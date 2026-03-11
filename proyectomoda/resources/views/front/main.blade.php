@@ -250,6 +250,20 @@
                 font-size: 1.9rem;
             }
         }
+        .btn-login{
+    background: linear-gradient(90deg, var(--rosa-medio), var(--morado-suave));
+    color: white;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: inline-block;
+    border: none;
+}
+
+.btn-login:hover{
+    color: white;
+    opacity: .92;
+}
     </style>
 </head>
 <body>
