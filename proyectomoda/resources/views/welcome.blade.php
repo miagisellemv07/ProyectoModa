@@ -96,7 +96,6 @@
                         <p class="text-muted mb-3">Opciones cómodas y versátiles para diferentes estilos.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price">$399 MXN</span>
-                            <a href="{{ route('dashboard') }}" class="btn btn-main btn-sm">Ver panel</a>
                         </div>
                     </div>
                 </div>
@@ -111,7 +110,6 @@
                         <p class="text-muted mb-3">Diseño moderno ideal para uso diario y distintos outfits.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price">$850 MXN</span>
-                            <a href="{{ route('dashboard.users') }}" class="btn btn-main btn-sm">Usuarios</a>
                         </div>
                     </div>
                 </div>
@@ -126,7 +124,6 @@
                         <p class="text-muted mb-3">Un ejemplo de cómo tu plataforma puede incluir todo tipo de productos.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price">$1,299 MXN</span>
-                            <a href="{{ route('dashboard') }}" class="btn btn-main btn-sm">Dashboard</a>
                         </div>
                     </div>
                 </div>

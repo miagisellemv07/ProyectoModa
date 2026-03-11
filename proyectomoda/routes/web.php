@@ -13,3 +13,6 @@ Route::get('/dashboard', function () {
 Route::get('/admin/users', function () {
     return view('dash.users');
 })->name('dashboard.users');
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
