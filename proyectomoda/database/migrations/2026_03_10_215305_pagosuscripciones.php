@@ -11,7 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::create('pagosuscripciones', function (Blueprint $table) {
+
+    $table->id();
+    $table->foreignId('suscripcion_id')->references('id')->on('suscripciones');
+    $table->decimal('monto',10,2);
+    $table->enum('metodo_pago',['efectivo','transferencia']);
+    $table->date('fecha_pago');
+    $table->timestamps();
+
+});
     }
 
     /**

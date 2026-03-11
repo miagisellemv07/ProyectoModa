@@ -18,7 +18,7 @@ return new class extends Migration
     $table->decimal('precio_mensual',10,2);
     $table->date('fecha_inicio');
     $table->date('fecha_fin');
-    $table->string('estado');
+    $table->enum('estado',['activo','vencido','pendiente','cancelado']);
     $table->timestamps();
 
 });

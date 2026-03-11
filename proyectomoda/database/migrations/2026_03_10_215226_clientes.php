@@ -14,7 +14,7 @@ return new class extends Migration
       Schema::create('clientes', function (Blueprint $table) {
 
     $table->id();
-    $table->foreignId('usuario_id')->references('id')->on('usuarios');
+    $table->foreignId('usuario_id')->references('id')->on('users');
     $table->string('direccion');
     $table->timestamps();
 
