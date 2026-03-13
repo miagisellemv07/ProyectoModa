@@ -14,7 +14,7 @@ class usersSeeder extends Seeder
         'nombre' => 'Alondra',
         'apellido' => 'Salas',
         'email' => 'alondra@gmail.com',
-        'password' => '123456',
+        'password' => bcrypt('123456'),
         'tel' => '6561234567',
         'rol' => 'emprendedor'
     ]);
@@ -23,17 +23,26 @@ class usersSeeder extends Seeder
         'nombre' => 'Carlos',
         'apellido' => 'Ramirez',
         'email' => 'carlos@gmail.com',
-        'password' => '123456',
+        'password' => bcrypt('123456'),
         'tel' => '6561111111',
         'rol' => 'cliente'
     ]);
+
+    DB::table('users')->insert([
+    'nombre' => 'Admin',
+    'apellido' => 'Sistema',
+    'email' => 'admin@gmail.com',
+    'password' => bcrypt('123456'),
+    'tel' => '6560000000',
+    'rol' => 'admin'
+]);
 
     
     $dato = new user();
     $dato->nombre = 'Mia';
     $dato->apellido = 'Minjarez';
     $dato->email = 'mia@gmail.com';
-    $dato->password = '123456';
+    $dato->password = bcrypt('123456');
     $dato->tel = '6569876543';
     $dato->rol = 'cliente';
     $dato->save();
@@ -42,7 +51,7 @@ class usersSeeder extends Seeder
     $dato2->nombre = 'Luis';
     $dato2->apellido = 'Torres';
     $dato2->email = 'luis@gmail.com';
-    $dato2->password = '123456';
+    $dato2->password = bcrypt('123456');
     $dato2->tel = '6562222222';
     $dato2->rol = 'emprendedor';
     $dato2->save();

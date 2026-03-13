@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('suscripciones', function (Blueprint $table) {
 
     $table->id();
-    $table->foreignId('emprendedor_id')->references('id')->on('emprendedores');
+    $table->foreignId('tienda_id')->references('id')->on('tiendas');
     $table->decimal('precio_mensual',10,2);
     $table->date('fecha_inicio');
     $table->date('fecha_fin');

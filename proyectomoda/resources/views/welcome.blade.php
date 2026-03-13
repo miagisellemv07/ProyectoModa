@@ -14,7 +14,16 @@
 
                 <div class="d-flex flex-wrap gap-3">
                     <a href="#productos" class="btn btn-main">Explorar productos</a>
-                    <a href="{{ route('dashboard') }}" class="btn btn-soft">Ir al dashboard</a>
+
+                    @auth
+                        @if(auth()->user()->rol == 'admin')
+                            <a href="{{ route('dashboard.users') }}" class="btn btn-soft">Ir al panel</a>
+                        @else
+                            <a href="{{ url('/') }}" class="btn btn-soft">Seguir explorando</a>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-soft">Iniciar sesión</a>
+                    @endauth
                 </div>
             </div>
 
@@ -145,8 +154,16 @@
                 </div>
 
                 <div class="col-lg-5 text-lg-end">
-                    <a href="{{ route('dashboard') }}" class="btn btn-main me-2">Entrar al panel</a>
-                    <a href="{{ route('dashboard.users') }}" class="btn btn-soft">Gestionar usuarios</a>
+                    @auth
+                        @if(auth()->user()->rol == 'admin')
+                            <a href="{{ route('dashboard.users') }}" class="btn btn-main me-2">Entrar al panel</a>
+                            <a href="{{ route('dashboard.users') }}" class="btn btn-soft">Gestionar usuarios</a>
+                        @else
+                            <a href="{{ url('/') }}" class="btn btn-main me-2">Seguir explorando</a>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-main me-2">Iniciar sesión</a>
+                    @endauth
                 </div>
             </div>
         </div>
