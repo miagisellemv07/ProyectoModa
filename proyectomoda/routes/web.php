@@ -26,9 +26,9 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/dashboard/usuarios', function () {
-            return view('dash.users');
-        })->name('dashboard.users');
+
+        Route::resource('/dashboard/usuarios', \App\Http\Controllers\UserController::class)
+            ->names('usuarios');
 
         Route::get('/dashboard/clientes', function () {
             return view('dash.clientes');

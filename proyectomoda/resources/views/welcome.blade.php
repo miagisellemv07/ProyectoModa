@@ -17,7 +17,7 @@
 
                     @auth
                         @if(auth()->user()->rol == 'admin')
-                            <a href="{{ route('dashboard.users') }}" class="btn btn-soft">Ir al panel</a>
+                            <a href="{{ route('dashboard') }}" class="btn btn-soft">Ir al panel</a>
                         @else
                             <a href="{{ url('/') }}" class="btn btn-soft">Seguir explorando</a>
                         @endif
@@ -156,8 +156,8 @@
                 <div class="col-lg-5 text-lg-end">
                     @auth
                         @if(auth()->user()->rol == 'admin')
-                            <a href="{{ route('dashboard.users') }}" class="btn btn-main me-2">Entrar al panel</a>
-                            <a href="{{ route('dashboard.users') }}" class="btn btn-soft">Gestionar usuarios</a>
+                            <a href="{{ route('dashboard') }}" class="btn btn-main me-2">Entrar al panel</a>
+                            <a href="{{ route('usuarios.index') }}" class="btn btn-soft">Gestionar usuarios</a>
                         @else
                             <a href="{{ url('/') }}" class="btn btn-main me-2">Seguir explorando</a>
                         @endif
