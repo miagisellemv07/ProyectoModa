@@ -28,7 +28,7 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:150', 'unique:users,email'],
             'tel' => ['nullable', 'string', 'max:20'],
             'rol' => ['required', Rule::in(['admin', 'emprendedor', 'cliente'])],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'confirmed'],
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
             'apellido.required' => 'El apellido es obligatorio.',
@@ -38,7 +38,6 @@ class UserController extends Controller
             'rol.required' => 'Debes seleccionar un rol.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.confirmed' => 'La confirmación de contraseña no coincide.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ]);
 
         User::create([
@@ -50,7 +49,8 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
+        return redirect()->route('usuarios.index')
+            ->with('success', 'Usuario creado correctamente.');
     }
 
     public function show(string $id)
@@ -72,10 +72,15 @@ class UserController extends Controller
         $request->validate([
             'nombre' => ['required', 'string', 'max:100'],
             'apellido' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($usuario->id)],
+            'email' => [
+                'required',
+                'email',
+                'max:150',
+                Rule::unique('users', 'email')->ignore($usuario->id)
+            ],
             'tel' => ['nullable', 'string', 'max:20'],
             'rol' => ['required', Rule::in(['admin', 'emprendedor', 'cliente'])],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'password' => ['nullable', 'string', 'confirmed'],
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
             'apellido.required' => 'El apellido es obligatorio.',
@@ -84,7 +89,6 @@ class UserController extends Controller
             'email.unique' => 'Ese correo ya está registrado.',
             'rol.required' => 'Debes seleccionar un rol.',
             'password.confirmed' => 'La confirmación de contraseña no coincide.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ]);
 
         $usuario->nombre = $request->nombre;
@@ -99,7 +103,8 @@ class UserController extends Controller
 
         $usuario->save();
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');
+        return redirect()->route('usuarios.index')
+            ->with('success', 'Usuario actualizado correctamente.');
     }
 
     public function destroy(string $id)
@@ -107,6 +112,7 @@ class UserController extends Controller
         $usuario = User::findOrFail($id);
         $usuario->delete();
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuario eliminado correctamente.');
+        return redirect()->route('usuarios.index')
+            ->with('success', 'Usuario eliminado correctamente.');
     }
 }
