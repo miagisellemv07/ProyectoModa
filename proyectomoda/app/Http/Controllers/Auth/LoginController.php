@@ -11,13 +11,7 @@ class LoginController extends Controller
 
     protected function redirectTo()
     {
-        $rol = auth()->user()->rol;
-
-        if ($rol == 'admin') {
-            return '/admin/users';
-        }
-
-        return '/';
+        return '/dashboard';
     }
 
     public function __construct()

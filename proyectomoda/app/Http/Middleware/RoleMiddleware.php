@@ -13,7 +13,7 @@ class RoleMiddleware
             return redirect('/login');
         }
 
-        if (auth()->user()->rol != $role) {
+        if (auth()->user()->rol !== $role) {
             abort(403, 'No autorizado');
         }
 

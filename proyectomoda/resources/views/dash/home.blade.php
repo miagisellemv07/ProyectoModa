@@ -2,84 +2,101 @@
 
 @section('contenido')
 
-<div class="d-flex justify-content-between align-items-center mb-5">
+<div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
     <div>
-        <h2 class="fw-bold m-0">Resumen General</h2>
-        <p class="text-muted m-0">Panel principal de Virtuality Emprendedores Mall</p>
+        <h2 class="fw-bold m-0">
+            Bienvenido,
+            @auth
+                {{ auth()->user()->nombre }}
+            @endauth
+        </h2>
+        <p class="text-muted m-0">
+            Dashboard principal del sistema Virtuality Mall
+        </p>
     </div>
 
     <div class="text-muted small">
-        Última actualización: Hoy, 20:45
+        @auth
+            Rol actual: <strong>{{ ucfirst(auth()->user()->rol) }}</strong>
+        @endauth
     </div>
 </div>
 
-<!-- Tarjetas de estadísticas -->
-<div class="row g-4 mb-5">
-
-    <div class="col-md-3">
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
         <div class="stat-card">
             <div class="stat-icon bg-accent-soft">
-                <i class="fas fa-store"></i>
+                <i class="fas fa-user"></i>
             </div>
-
-            <div class="text-muted small fw-medium">
-                Tiendas Registradas
-            </div>
-
-            <div class="h3 fw-bold mt-1">
-                24
+            <div class="text-muted small fw-medium">Usuario autenticado</div>
+            <div class="h4 fw-bold mt-1">
+                @auth
+                    {{ auth()->user()->nombre }} {{ auth()->user()->apellido }}
+                @endauth
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div class="stat-card">
             <div class="stat-icon bg-blue-soft">
-                <i class="fas fa-box"></i>
+                <i class="fas fa-envelope"></i>
             </div>
-
-            <div class="text-muted small fw-medium">
-                Productos Activos
-            </div>
-
-            <div class="h3 fw-bold mt-1">
-                186
+            <div class="text-muted small fw-medium">Correo electrónico</div>
+            <div class="h5 fw-bold mt-1">
+                @auth
+                    {{ auth()->user()->email }}
+                @endauth
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon bg-green-soft">
-                <i class="fas fa-shopping-cart"></i>
-            </div>
-
-            <div class="text-muted small fw-medium">
-                Órdenes Completadas
-            </div>
-
-            <div class="h3 fw-bold mt-1">
-                93
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div class="stat-card">
             <div class="stat-icon bg-purple-soft">
-                <i class="fas fa-users"></i>
+                <i class="fas fa-shield-halved"></i>
             </div>
-
-            <div class="text-muted small fw-medium">
-                Usuarios Registrados
-            </div>
-
-            <div class="h3 fw-bold mt-1">
-                58
+            <div class="text-muted small fw-medium">Nivel de acceso</div>
+            <div class="h4 fw-bold mt-1">
+                @auth
+                    {{ ucfirst(auth()->user()->rol) }}
+                @endauth
             </div>
         </div>
     </div>
+</div>
 
+<div class="table-card">
+    <h4 class="fw-bold mb-3">Acciones disponibles</h4>
+
+    @auth
+        @if(auth()->user()->rol === 'admin')
+            <p class="mb-2">Como <strong>administrador</strong> puedes acceder a:</p>
+            <ul class="mb-0">
+                <li>Home</li>
+                <li>Clientes / Emprendedores</li>
+                <li>Tiendas</li>
+                <li>Usuarios</li>
+            </ul>
+        @elseif(auth()->user()->rol === 'emprendedor')
+            <p class="mb-2">Como <strong>emprendedor</strong> puedes acceder a:</p>
+            <ul class="mb-0">
+                <li>Home</li>
+                <li>Productos</li>
+                <li>Pedidos</li>
+                <li>Pagos</li>
+            </ul>
+        @elseif(auth()->user()->rol === 'cliente')
+            <p class="mb-2">Como <strong>cliente</strong> puedes acceder a:</p>
+            <ul class="mb-0">
+                <li>Home</li>
+                <li>Compras</li>
+                <li>Pagos</li>
+            </ul>
+        @else
+            <p class="mb-0 text-danger">Este usuario no tiene un rol válido asignado.</p>
+        @endif
+    @endauth
 </div>
 
 @endsection
