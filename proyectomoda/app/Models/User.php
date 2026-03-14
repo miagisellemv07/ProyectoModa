@@ -33,4 +33,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function emprendedor()
+    {
+        return $this->hasOne(emprendedore::class, 'usuario_id');
+    }
 }

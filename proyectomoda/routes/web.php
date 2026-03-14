@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\EmprendedorController;
+use App\Http\Controllers\TiendaController;
+use App\Http\Controllers\ProductoController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -9,45 +13,28 @@ Route::get('/', function () {
 
 Auth::routes();
 
-/*
-|--------------------------------------------------------------------------
-| Dashboard general para todos los usuarios autenticados
-|--------------------------------------------------------------------------
-*/
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', function () {
         return view('dash.home');
     })->name('dashboard');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Rutas del administrador
-    |--------------------------------------------------------------------------
-    */
     Route::middleware(['role:admin'])->group(function () {
 
-        Route::resource('/dashboard/usuarios', \App\Http\Controllers\UserController::class)
+        Route::resource('/dashboard/usuarios', UserController::class)
             ->names('usuarios');
 
-        Route::get('/dashboard/clientes', function () {
-            return view('dash.clientes');
-        })->name('dashboard.clientes');
+        Route::resource('/dashboard/emprendedores', EmprendedorController::class)
+            ->names('emprendedores');
 
-        Route::get('/dashboard/tiendas', function () {
-            return view('dash.tiendas');
-        })->name('dashboard.tiendas');
+        Route::resource('/dashboard/tiendas', TiendaController::class)
+            ->names('tiendas');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Rutas del emprendedor
-    |--------------------------------------------------------------------------
-    */
     Route::middleware(['role:emprendedor'])->group(function () {
-        Route::get('/dashboard/productos', function () {
-            return view('dash.productos');
-        })->name('dashboard.productos');
+
+        Route::resource('/dashboard/productos', ProductoController::class)
+            ->names('productos');
 
         Route::get('/dashboard/pedidos', function () {
             return view('dash.pedidos');
@@ -58,11 +45,6 @@ Route::middleware(['auth'])->group(function () {
         })->name('dashboard.pagos');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Rutas del cliente
-    |--------------------------------------------------------------------------
-    */
     Route::middleware(['role:cliente'])->group(function () {
         Route::get('/dashboard/compras', function () {
             return view('dash.compras');

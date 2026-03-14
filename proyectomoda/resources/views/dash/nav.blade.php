@@ -13,18 +13,17 @@
 
     @auth
 
-        {{-- ADMIN --}}
         @if(auth()->user()->rol === 'admin')
 
             <a href="{{ route('dashboard') }}" class="nav-link">
                 <i class="fas fa-house"></i> Home
             </a>
 
-            <a href="{{ route('dashboard.clientes') }}" class="nav-link">
+            <a href="{{ route('emprendedores.index') }}" class="nav-link">
                 <i class="fas fa-user-tie"></i> Clientes / Emprendedores
             </a>
 
-            <a href="{{ route('dashboard.tiendas') }}" class="nav-link">
+            <a href="{{ route('tiendas.index') }}" class="nav-link">
                 <i class="fas fa-store"></i> Tiendas
             </a>
 
@@ -32,14 +31,13 @@
                 <i class="fas fa-users-cog"></i> Usuarios
             </a>
 
-        {{-- EMPRENDEDOR --}}
         @elseif(auth()->user()->rol === 'emprendedor')
 
             <a href="{{ route('dashboard') }}" class="nav-link">
                 <i class="fas fa-house"></i> Home
             </a>
 
-            <a href="{{ route('dashboard.productos') }}" class="nav-link">
+            <a href="{{ route('productos.index') }}" class="nav-link">
                 <i class="fas fa-box-open"></i> Productos
             </a>
 
@@ -51,7 +49,6 @@
                 <i class="fas fa-credit-card"></i> Pagos
             </a>
 
-        {{-- CLIENTE --}}
         @elseif(auth()->user()->rol === 'cliente')
 
             <a href="{{ route('dashboard') }}" class="nav-link">
@@ -82,5 +79,4 @@
             <i class="fas fa-sign-out-alt"></i> Cerrar sesión
         </button>
     </form>
-
 </nav>
