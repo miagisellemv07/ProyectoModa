@@ -4,9 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\emprendedore;
-use App\Models\tienda;
-use App\Models\producto;
-use App\Models\carrito;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -100,6 +97,14 @@ class EmprendedorController extends Controller
             'tel' => ['nullable', 'string', 'max:20'],
             'password' => ['nullable', 'string', 'confirmed'],
             'nombre_marca' => ['required', 'string', 'max:150'],
+        ], [
+            'nombre.required' => 'El nombre es obligatorio.',
+            'apellido.required' => 'El apellido es obligatorio.',
+            'email.required' => 'El correo es obligatorio.',
+            'email.email' => 'Debes escribir un correo válido.',
+            'email.unique' => 'Ese correo ya está registrado.',
+            'password.confirmed' => 'La confirmación de contraseña no coincide.',
+            'nombre_marca.required' => 'El nombre de la marca es obligatorio.',
         ]);
 
         $emprendedor->nombre = $request->nombre;
@@ -128,26 +133,73 @@ class EmprendedorController extends Controller
         $usuario = User::where('rol', 'emprendedor')->findOrFail($id);
 
         DB::transaction(function () use ($usuario) {
-            $detalles = emprendedore::where('usuario_id', $usuario->id)->get();
+            $emprendedorIds = DB::table('emprendedores')
+                ->where('usuario_id', $usuario->id)
+                ->pluck('id')
+                ->all();
 
-            foreach ($detalles as $detalle) {
-                $tiendas = tienda::where('emprendedor_id', $detalle->id)->get();
+            if (!empty($emprendedorIds)) {
+                $tiendaIds = DB::table('tiendas')
+                    ->whereIn('emprendedor_id', $emprendedorIds)
+                    ->pluck('id')
+                    ->all();
 
-                foreach ($tiendas as $t) {
-                    $productos = producto::where('tienda_id', $t->id)->get();
+                if (!empty($tiendaIds)) {
+                    $suscripcionIds = DB::table('suscripciones')
+                        ->whereIn('tienda_id', $tiendaIds)
+                        ->pluck('id')
+                        ->all();
 
-                    foreach ($productos as $prod) {
-                        carrito::where('producto_id', $prod->id)->delete();
-                        $prod->delete();
+                    if (!empty($suscripcionIds)) {
+                        DB::table('pagosuscripciones')
+                            ->whereIn('suscripcion_id', $suscripcionIds)
+                            ->delete();
+
+                        DB::table('suscripciones')
+                            ->whereIn('id', $suscripcionIds)
+                            ->delete();
                     }
 
-                    $t->delete();
+                    $productoIds = DB::table('productos')
+                        ->whereIn('tienda_id', $tiendaIds)
+                        ->pluck('id')
+                        ->all();
+
+                    if (!empty($productoIds)) {
+                        DB::table('carritos')
+                            ->whereIn('producto_id', $productoIds)
+                            ->delete();
+
+                        DB::table('ordenitems')
+                            ->whereIn('producto_id', $productoIds)
+                            ->delete();
+
+                        DB::table('productos')
+                            ->whereIn('id', $productoIds)
+                            ->delete();
+                    }
+
+                    DB::table('ordenitems')
+                        ->whereIn('tienda_id', $tiendaIds)
+                        ->delete();
+
+                    DB::table('tiendas')
+                        ->whereIn('id', $tiendaIds)
+                        ->delete();
                 }
 
-                $detalle->delete();
+                DB::table('emprendedores')
+                    ->whereIn('id', $emprendedorIds)
+                    ->delete();
             }
 
-            $usuario->delete();
+            DB::table('sessions')
+                ->where('user_id', $usuario->id)
+                ->delete();
+
+            DB::table('users')
+                ->where('id', $usuario->id)
+                ->delete();
         });
 
         return redirect()->route('emprendedores.index')

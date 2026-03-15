@@ -125,36 +125,29 @@ class UserController extends Controller
                 ->all();
 
             if (!empty($clienteIds)) {
-
-                // Borrar carritos del cliente
                 DB::table('carritos')
                     ->whereIn('cliente_id', $clienteIds)
                     ->delete();
 
-                // Buscar órdenes del cliente
                 $ordenIds = DB::table('ordenes')
                     ->whereIn('cliente_id', $clienteIds)
                     ->pluck('id')
                     ->all();
 
                 if (!empty($ordenIds)) {
-                    // Si tus items de orden dependen de ordenes
                     DB::table('ordenitems')
                         ->whereIn('orden_id', $ordenIds)
                         ->delete();
 
-                    // Si tus pagos de orden dependen de ordenes
                     DB::table('pagoordenes')
                         ->whereIn('orden_id', $ordenIds)
                         ->delete();
 
-                    // Borrar órdenes
                     DB::table('ordenes')
                         ->whereIn('id', $ordenIds)
                         ->delete();
                 }
 
-                // Finalmente borrar clientes
                 DB::table('clientes')
                     ->whereIn('id', $clienteIds)
                     ->delete();
@@ -177,35 +170,49 @@ class UserController extends Controller
                     ->all();
 
                 if (!empty($tiendaIds)) {
+                    $suscripcionIds = DB::table('suscripciones')
+                        ->whereIn('tienda_id', $tiendaIds)
+                        ->pluck('id')
+                        ->all();
+
+                    if (!empty($suscripcionIds)) {
+                        DB::table('pagosuscripciones')
+                            ->whereIn('suscripcion_id', $suscripcionIds)
+                            ->delete();
+
+                        DB::table('suscripciones')
+                            ->whereIn('id', $suscripcionIds)
+                            ->delete();
+                    }
+
                     $productoIds = DB::table('productos')
                         ->whereIn('tienda_id', $tiendaIds)
                         ->pluck('id')
                         ->all();
 
                     if (!empty($productoIds)) {
-                        // Borrar carritos asociados a productos
                         DB::table('carritos')
                             ->whereIn('producto_id', $productoIds)
                             ->delete();
 
-                        // Si tus ordenitems apuntan a productos
                         DB::table('ordenitems')
                             ->whereIn('producto_id', $productoIds)
                             ->delete();
 
-                        // Borrar productos
                         DB::table('productos')
                             ->whereIn('id', $productoIds)
                             ->delete();
                     }
 
-                    // Borrar tiendas
+                    DB::table('ordenitems')
+                        ->whereIn('tienda_id', $tiendaIds)
+                        ->delete();
+
                     DB::table('tiendas')
                         ->whereIn('id', $tiendaIds)
                         ->delete();
                 }
 
-                // Borrar emprendedores
                 DB::table('emprendedores')
                     ->whereIn('id', $emprendedorIds)
                     ->delete();
@@ -213,7 +220,16 @@ class UserController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | 3) Finalmente el usuario
+            | 3) Sesiones del usuario
+            |--------------------------------------------------------------------------
+            */
+            DB::table('sessions')
+                ->where('user_id', $usuario->id)
+                ->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | 4) Finalmente el usuario
             |--------------------------------------------------------------------------
             */
             DB::table('users')
