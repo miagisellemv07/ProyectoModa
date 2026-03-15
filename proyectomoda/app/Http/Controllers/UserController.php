@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -110,7 +111,115 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         $usuario = User::findOrFail($id);
-        $usuario->delete();
+
+        DB::transaction(function () use ($usuario) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | 1) Lado CLIENTE
+            |--------------------------------------------------------------------------
+            */
+            $clienteIds = DB::table('clientes')
+                ->where('usuario_id', $usuario->id)
+                ->pluck('id')
+                ->all();
+
+            if (!empty($clienteIds)) {
+
+                // Borrar carritos del cliente
+                DB::table('carritos')
+                    ->whereIn('cliente_id', $clienteIds)
+                    ->delete();
+
+                // Buscar órdenes del cliente
+                $ordenIds = DB::table('ordenes')
+                    ->whereIn('cliente_id', $clienteIds)
+                    ->pluck('id')
+                    ->all();
+
+                if (!empty($ordenIds)) {
+                    // Si tus items de orden dependen de ordenes
+                    DB::table('ordenitems')
+                        ->whereIn('orden_id', $ordenIds)
+                        ->delete();
+
+                    // Si tus pagos de orden dependen de ordenes
+                    DB::table('pagoordenes')
+                        ->whereIn('orden_id', $ordenIds)
+                        ->delete();
+
+                    // Borrar órdenes
+                    DB::table('ordenes')
+                        ->whereIn('id', $ordenIds)
+                        ->delete();
+                }
+
+                // Finalmente borrar clientes
+                DB::table('clientes')
+                    ->whereIn('id', $clienteIds)
+                    ->delete();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | 2) Lado EMPRENDEDOR
+            |--------------------------------------------------------------------------
+            */
+            $emprendedorIds = DB::table('emprendedores')
+                ->where('usuario_id', $usuario->id)
+                ->pluck('id')
+                ->all();
+
+            if (!empty($emprendedorIds)) {
+                $tiendaIds = DB::table('tiendas')
+                    ->whereIn('emprendedor_id', $emprendedorIds)
+                    ->pluck('id')
+                    ->all();
+
+                if (!empty($tiendaIds)) {
+                    $productoIds = DB::table('productos')
+                        ->whereIn('tienda_id', $tiendaIds)
+                        ->pluck('id')
+                        ->all();
+
+                    if (!empty($productoIds)) {
+                        // Borrar carritos asociados a productos
+                        DB::table('carritos')
+                            ->whereIn('producto_id', $productoIds)
+                            ->delete();
+
+                        // Si tus ordenitems apuntan a productos
+                        DB::table('ordenitems')
+                            ->whereIn('producto_id', $productoIds)
+                            ->delete();
+
+                        // Borrar productos
+                        DB::table('productos')
+                            ->whereIn('id', $productoIds)
+                            ->delete();
+                    }
+
+                    // Borrar tiendas
+                    DB::table('tiendas')
+                        ->whereIn('id', $tiendaIds)
+                        ->delete();
+                }
+
+                // Borrar emprendedores
+                DB::table('emprendedores')
+                    ->whereIn('id', $emprendedorIds)
+                    ->delete();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | 3) Finalmente el usuario
+            |--------------------------------------------------------------------------
+            */
+            DB::table('users')
+                ->where('id', $usuario->id)
+                ->delete();
+        });
 
         return redirect()->route('usuarios.index')
             ->with('success', 'Usuario eliminado correctamente.');

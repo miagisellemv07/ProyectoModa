@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\emprendedore;
+use App\Models\tienda;
+use App\Models\producto;
+use App\Models\carrito;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -121,10 +125,30 @@ class EmprendedorController extends Controller
 
     public function destroy(string $id)
     {
-        $emprendedor = User::where('rol', 'emprendedor')->findOrFail($id);
+        $usuario = User::where('rol', 'emprendedor')->findOrFail($id);
 
-        emprendedore::where('usuario_id', $emprendedor->id)->delete();
-        $emprendedor->delete();
+        DB::transaction(function () use ($usuario) {
+            $detalles = emprendedore::where('usuario_id', $usuario->id)->get();
+
+            foreach ($detalles as $detalle) {
+                $tiendas = tienda::where('emprendedor_id', $detalle->id)->get();
+
+                foreach ($tiendas as $t) {
+                    $productos = producto::where('tienda_id', $t->id)->get();
+
+                    foreach ($productos as $prod) {
+                        carrito::where('producto_id', $prod->id)->delete();
+                        $prod->delete();
+                    }
+
+                    $t->delete();
+                }
+
+                $detalle->delete();
+            }
+
+            $usuario->delete();
+        });
 
         return redirect()->route('emprendedores.index')
             ->with('success', 'Emprendedor eliminado correctamente.');
