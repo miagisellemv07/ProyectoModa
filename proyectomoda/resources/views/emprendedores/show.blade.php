@@ -14,6 +14,6 @@
     <p><strong>Teléfono:</strong> {{ $emprendedor->tel }}</p>
     <p><strong>Rol:</strong> Emprendedor</p>
 
-    <a href="{{ route('dashboard.emprendedores') }}" class="btn btn-secondary">Volver</a>
+    <a href="{{ route('emprendedores.index') }}" class="btn btn-secondary">Volver</a>
 </div>
 @endsection

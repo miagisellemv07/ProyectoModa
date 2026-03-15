@@ -20,7 +20,7 @@ class TiendaController extends Controller
 
     public function create()
     {
-        $emprendedores = emprendedore::with('usuario')->get();
+        $emprendedores = emprendedore::with('usuario')->orderBy('id', 'desc')->get();
         return view('tiendas.create', compact('emprendedores'));
     }
 
@@ -38,6 +38,7 @@ class TiendaController extends Controller
             'descripcion.required' => 'La descripción es obligatoria.',
             'categoria.required' => 'La categoría es obligatoria.',
             'emprendedor_id.required' => 'Debes seleccionar un emprendedor.',
+            'emprendedor_id.exists' => 'El emprendedor seleccionado no existe en la tabla emprendedores.',
         ]);
 
         tienda::create([
@@ -61,7 +62,7 @@ class TiendaController extends Controller
     public function edit(string $id)
     {
         $tienda = tienda::findOrFail($id);
-        $emprendedores = emprendedore::with('usuario')->get();
+        $emprendedores = emprendedore::with('usuario')->orderBy('id', 'desc')->get();
 
         return view('tiendas.edit', compact('tienda', 'emprendedores'));
     }
@@ -76,6 +77,13 @@ class TiendaController extends Controller
             'descripcion' => ['required', 'string'],
             'categoria' => ['required', 'string', 'max:100'],
             'emprendedor_id' => ['required', Rule::exists('emprendedores', 'id')],
+        ], [
+            'nombre.required' => 'El nombre es obligatorio.',
+            'logo.required' => 'El logo es obligatorio.',
+            'descripcion.required' => 'La descripción es obligatoria.',
+            'categoria.required' => 'La categoría es obligatoria.',
+            'emprendedor_id.required' => 'Debes seleccionar un emprendedor.',
+            'emprendedor_id.exists' => 'El emprendedor seleccionado no existe en la tabla emprendedores.',
         ]);
 
         $tienda->update([

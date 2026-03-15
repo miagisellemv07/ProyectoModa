@@ -51,7 +51,7 @@ Route::middleware(['auth'])->group(function () {
         })->name('dashboard.compras');
 
         Route::get('/dashboard/mis-pagos', function () {
-            return view('dash.mis_pagos');
+            return view('dash.mis-pagos');
         })->name('dashboard.mis_pagos');
     });
 });
