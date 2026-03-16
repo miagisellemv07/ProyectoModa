@@ -4,34 +4,25 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\cliente;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
-
     use RegistersUsers;
 
     /**
-     * Where to redirect users after registration.
+     * A dónde redirigir después del registro
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/dashboard';
 
     /**
-     * Create a new controller instance.
+     * Crear instancia del controlador
      *
      * @return void
      */
@@ -41,30 +32,55 @@ class RegisterController extends Controller
     }
 
     /**
-     * Get a validator for an incoming registration request.
+     * Validación del formulario de registro
      *
+     * @param array $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'nombre' => ['required', 'string', 'max:100'],
+            'apellido' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'string', 'email', 'max:150', 'unique:users,email'],
+            'tel' => ['nullable', 'string', 'max:20'],
+            'direccion' => ['nullable', 'string', 'max:255'],
+            'password' => ['required', 'string', 'confirmed'],
+        ], [
+            'nombre.required' => 'El nombre es obligatorio.',
+            'apellido.required' => 'El apellido es obligatorio.',
+            'email.required' => 'El correo es obligatorio.',
+            'email.email' => 'Debes ingresar un correo válido.',
+            'email.unique' => 'Ese correo ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.confirmed' => 'La confirmación de la contraseña no coincide.',
         ]);
     }
 
     /**
-     * Create a new user instance after a valid registration.
+     * Crear usuario nuevo
      *
-     * @return User
+     * @param array $data
+     * @return \App\Models\User
      */
     protected function create(array $data)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        return DB::transaction(function () use ($data) {
+            $usuario = User::create([
+                'nombre' => $data['nombre'],
+                'apellido' => $data['apellido'],
+                'email' => $data['email'],
+                'tel' => $data['tel'] ?? null,
+                'rol' => 'cliente',
+                'password' => Hash::make($data['password']),
+            ]);
+
+            cliente::create([
+                'usuario_id' => $usuario->id,
+                'direccion' => $data['direccion'] ?? 'Sin dirección',
+            ]);
+
+            return $usuario;
+        });
     }
 }
