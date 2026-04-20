@@ -10,4 +10,7 @@ class cliente extends Model
     'usuario_id',
     'direccion'
 ];
+public function usuario_id(){
+        return $this->belongsTo(User::class);
+    }
 }

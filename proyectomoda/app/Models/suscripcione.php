@@ -13,4 +13,7 @@ class suscripcione extends Model
     'fecha_fin',
     'estado'
 ];
+ public function tienda_id(){
+        return $this->belongsTo(tienda::class);
+    }
 }

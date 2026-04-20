@@ -15,6 +15,7 @@ class tienda extends Model
         'descripcion',
         'categoria'
     ];
+   
 
     public function emprendedor()
     {

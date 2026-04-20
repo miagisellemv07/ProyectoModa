@@ -12,8 +12,7 @@ class emprendedore extends Model
         'usuario_id',
         'nombre_marca'
     ];
-
-    public function usuario()
+    public function usuario_id()
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }

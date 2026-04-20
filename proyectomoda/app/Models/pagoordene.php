@@ -13,4 +13,7 @@ class pagoordene extends Model
     'estado',
     'fecha_pago'
 ];
+ public function orden_id(){
+        return $this->belongsTo(ordene::class);
+    }
 }

@@ -15,4 +15,7 @@ class ordene extends Model
     'telefono',
     'notas'
 ];
+public function cliente_id(){
+        return $this->belongsTo(cliente::class);
+    }
 }

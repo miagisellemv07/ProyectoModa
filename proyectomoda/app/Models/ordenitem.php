@@ -14,4 +14,13 @@ class ordenitem extends Model
     'precio_unitario',
     'subtotal'
 ];
+public function orden_id(){
+        return $this->belongsTo(ordene::class);
+    }
+public function producto_id(){
+        return $this->belongsTo(producto::class);
+    }
+public function tienda_id(){
+        return $this->belongsTo(tienda::class);
+    }
 }

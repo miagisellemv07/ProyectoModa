@@ -12,4 +12,7 @@ class pagosuscripcione extends Model
     'metodo_pago',
     'fecha_pago'
 ];
+ public function suscripcion_id(){
+        return $this->belongsTo(suscripcione::class);
+    }
 }

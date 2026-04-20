@@ -13,4 +13,10 @@ class carrito extends Model
     'precio_unitario',
     'subtotal'
 ];
+public function cliente_id(){
+        return $this->belongsTo(cliente::class);
+    }
+    public function producto_id(){
+        return $this->belongsTo(producto::class);
+    }
 }
