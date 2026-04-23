@@ -26,25 +26,25 @@ class PagosuscripcioneController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'suscripcion_id' => 'required|exists:suscripciones,id',
-            'monto' => 'required|numeric',
-            'metodo_pago' => 'required|string',
-            'fecha_pago' => 'required|date'
-        ]);
+       $validated = $request->validate([
+    'suscripcion_id' => 'required|exists:suscripciones,id',
+    'monto' => 'required|numeric',
+    'metodo_pago' => 'required|string',
+    'fecha_pago' => 'required|date'
+]);
 
-        $pagosuscripcione = new pagosuscripcione();
-        $papagosuscripcionego->suscripcion_id = $request->suscripcion_id;
-        $papagosuscripcionego->monto = $request->monto;
-        $papagosuscripcionego->metodo_pago = $request->metodo_pago;
-        $papagosuscripcionego->fecha_pago = $request->fecha_pago;
+$pagosuscripcione = new pagosuscripcione();
+$pagosuscripcione->suscripcion_id = $request->suscripcion_id;
+$pagosuscripcione->monto = $request->monto;
+$pagosuscripcione->metodo_pago = $request->metodo_pago;
+$pagosuscripcione->fecha_pago = $request->fecha_pago;
 
-        $papagosuscripcionego->save();
+$pagosuscripcione->save();
 
-        return response()->json([
-            "data" => $pagosuscripcione,
-            "status" => "success"
-        ], 201);
+return response()->json([
+    "data" => $pagosuscripcione,
+    "status" => "success"
+], 201);
     }
 
     /**
@@ -73,32 +73,24 @@ class PagosuscripcioneController extends Controller
     public function update(Request $request, string $id)
     {
         $validated = $request->validate([
-            'suscripcion_id' => 'required|exists:suscripciones,id',
-            'monto' => 'required|numeric',
-            'metodo_pago' => 'required|string',
-            'fecha_pago' => 'required|date'
-        ]);
+    'suscripcion_id' => 'required|exists:suscripciones,id',
+    'monto' => 'required|numeric',
+    'metodo_pago' => 'required|string',
+    'fecha_pago' => 'required|date'
+]);
 
-        $pago = pagosuscripcione::find($id);
+$pagosuscripcione = pagosuscripcione::find($id);
+$pagosuscripcione->suscripcion_id = $request->suscripcion_id;
+$pagosuscripcione->monto = $request->monto;
+$pagosuscripcione->metodo_pago = $request->metodo_pago;
+$pagosuscripcione->fecha_pago = $request->fecha_pago;
 
-        if ($pago == null) {
-            return response()->json([
-                "message" => "pago no encontrado",
-                "status" => "Error"
-            ], 404);
-        }
+$pagosuscripcione->save();
 
-        $pago->suscripcion_id = $request->suscripcion_id;
-        $pago->monto = $request->monto;
-        $pago->metodo_pago = $request->metodo_pago;
-        $pago->fecha_pago = $request->fecha_pago;
-
-        $pago->save();
-
-        return response()->json([
-            "data" => $pago,
-            "status" => "success"
-        ], 200);
+return response()->json([
+    "data" => $pagosuscripcione,
+    "status" => "success"
+], 201);
     }
 
     /**
