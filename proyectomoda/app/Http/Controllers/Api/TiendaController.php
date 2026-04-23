@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\tienda;
 
 class TiendaController extends Controller
 {
@@ -32,7 +33,28 @@ class TiendaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
+          $validated = $request->validate([
+        'emprendedor_id' => 'required|exists:emprendedores,id',
+        'nombre' => 'required|min:3|max:50',
+        'logo' => 'nullable|string',
+        'descripcion' => 'required|min:5',
+        'categoria' => 'required'
+    ]);
+
+    $tienda = new tienda();
+    $tienda->emprendedor_id = $request->emprendedor_id;
+    $tienda->nombre = $request->nombre;
+    $tienda->logo = $request->logo;
+    $tienda->descripcion = $request->descripcion;
+    $tienda->categoria = $request->categoria;
+
+    $tienda->save();
+
+    return response()->json([
+        "data" => $tienda,
+        "status" => "success"
+    ], 201);
     }
 
     /**
@@ -40,7 +62,17 @@ class TiendaController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $tienda=tienda::find($id);
+        if($tienda == null){
+            return response()->json([
+                "message"=>"tienda no encontrada",
+                "status"=>"Error"
+            ],404);
+        }
+        return response()->json([
+            "data"=>$tienda,
+            "status"=>"Success"
+        ],200);
     }
 
     /**
@@ -56,7 +88,29 @@ class TiendaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        
+        
+          $validated = $request->validate([
+        'emprendedor_id' => 'required|exists:emprendedores,id',
+        'nombre' => 'required|min:3|max:50',
+        'logo' => 'nullable|string',
+        'descripcion' => 'required|min:5',
+        'categoria' => 'required'
+    ]);
+
+   $tienda = tienda::find($id);
+    $tienda->emprendedor_id = $request->emprendedor_id;
+    $tienda->nombre = $request->nombre;
+    $tienda->logo = $request->logo;
+    $tienda->descripcion = $request->descripcion;
+    $tienda->categoria = $request->categoria;
+
+    $tienda->save();
+
+    return response()->json([
+        "data" => $tienda,
+        "status" => "success"
+    ], 201);
     }
 
     /**
@@ -64,6 +118,18 @@ class TiendaController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        
+           $tienda = tienda::find($id);
+        if($tienda == null){
+            return response()->json([
+                "error"=>"NO ENCONTRADO",
+                "status"=>"ERROR"
+            ],404);
+        }
+        $tienda->delete();
+        return response()->json([
+            "status"=>"Success",
+            "message"=>"Registro eliminado correctamente"
+        ],204);
     }
 }
