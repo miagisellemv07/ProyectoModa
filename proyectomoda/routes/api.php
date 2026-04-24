@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\OrdenitemController;
 use App\Http\Controllers\Api\EmprendedoreController;
 use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\CarritoController;
+use App\Http\Controllers\Api\AuthController;
 
 Route::resource('/carritos', CarritoController::class);
 Route::resource('/clientes', ClienteController::class);
@@ -24,3 +25,14 @@ Route::resource('/tiendas',TiendaController::class);
 Route::resource('/suscripciones',SuscripcionesController::class);
 Route::resource('/productos',ProductoController::class);
 Route::resource('/pagos',PagosuscripcioneController::class);
+
+
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('jwt')->group(function () {
+    Route::get('/user', [AuthController::class, 'getUser']);
+    Route::put('/user', [AuthController::class, 'updateUser']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    });
