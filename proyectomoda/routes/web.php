@@ -55,3 +55,7 @@ Route::middleware(['auth'])->group(function () {
         })->name('dashboard.mis_pagos');
     });
 });
+
+Route::get('/docs', function(){
+    return view('docs');
+});
