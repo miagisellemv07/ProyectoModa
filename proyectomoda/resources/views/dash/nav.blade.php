@@ -69,9 +69,9 @@
 
     <hr class="mx-4 opacity-25">
 
-    <a href="{{ route('home') }}" class="nav-link">
-        <i class="fas fa-external-link-alt"></i> Ver sitio web
-    </a>
+   <a href="http://localhost:5173" class="nav-link">
+    <i class="fas fa-external-link-alt"></i> Ver sitio web
+</a>
 
     <form method="POST" action="{{ route('logout') }}" class="mt-3">
         @csrf
