@@ -17,17 +17,17 @@ use App\Http\Controllers\Api\AuthController;
 
 Route::resource('/carritos', CarritoController::class);
 Route::resource('/clientes', ClienteController::class);
-Route::resource('/emprendedores', EmprendedoreController::class);
 Route::resource('/ordenes', OrdenitemController::class);
 Route::resource('/pagoordene', PagoordeneController::class);
 Route::resource('/users',UserController::class);
-Route::resource('/tiendas',TiendaController::class);
 Route::resource('/suscripciones',SuscripcionesController::class);
-Route::resource('/productos',ProductoController::class);
 Route::resource('/pagos',PagosuscripcioneController::class);
-
-
-
+Route::resource('/emprendedores', EmprendedoreController::class)
+    ->names('api.emprendedores');
+Route::resource('/tiendas', TiendaController::class)
+    ->names('api.tiendas');
+Route::resource('/productos', ProductoController::class)
+    ->names('api.productos');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
