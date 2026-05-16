@@ -9,48 +9,42 @@ use App\Models\producto;
 
 class ProductoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $producto = producto::with(['tienda'])->get();
+        $productos = producto::with(['tienda.emprendedor.usuario'])
+            ->orderBy('id', 'desc')
+            ->get();
 
         return response()->json([
-            "data" => $producto,
+            "data" => $productos,
             "status" => "success"
         ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|min:3|max:50',
+        $request->validate([
+            'nombre' => 'required|min:3|max:255',
             'descripcion' => 'required|min:5',
-            'precio' => 'required|numeric',
-            'stock' => 'required|integer',
+            'precio' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
             'tienda_id' => 'required|exists:tiendas,id',
             'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);
 
-        $producto = new producto();
-
-        $producto->nombre = $request->nombre;
-        $producto->descripcion = $request->descripcion;
-        $producto->precio = $request->precio;
-        $producto->stock = $request->stock;
-        $producto->tienda_id = $request->tienda_id;
+        $datos = [
+            'nombre' => $request->nombre,
+            'descripcion' => $request->descripcion,
+            'precio' => $request->precio,
+            'stock' => $request->stock,
+            'tienda_id' => $request->tienda_id,
+        ];
 
         if ($request->hasFile('imagen')) {
-            $producto->imagen = $request
-                ->file('imagen')
-                ->store('productos', 'public');
+            $datos['imagen'] = $request->file('imagen')->store('productos', 'public');
         }
 
-        $producto->save();
+        $producto = producto::create($datos);
 
         return response()->json([
             "data" => $producto,
@@ -58,14 +52,11 @@ class ProductoController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        $producto = producto::with(['tienda'])->find($id);
+        $producto = producto::with(['tienda.emprendedor.usuario'])->find($id);
 
-        if ($producto == null) {
+        if (!$producto) {
             return response()->json([
                 "message" => "producto no encontrado",
                 "status" => "Error"
@@ -78,25 +69,22 @@ class ProductoController extends Controller
         ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $producto = producto::find($id);
 
-        if ($producto == null) {
+        if (!$producto) {
             return response()->json([
                 "message" => "producto no encontrado",
                 "status" => "Error"
             ], 404);
         }
 
-        $validated = $request->validate([
-            'nombre' => 'required|min:3|max:50',
+        $request->validate([
+            'nombre' => 'required|min:3|max:255',
             'descripcion' => 'required|min:5',
-            'precio' => 'required|numeric',
-            'stock' => 'required|integer',
+            'precio' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
             'tienda_id' => 'required|exists:tiendas,id',
             'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);
@@ -108,14 +96,11 @@ class ProductoController extends Controller
         $producto->tienda_id = $request->tienda_id;
 
         if ($request->hasFile('imagen')) {
-
             if ($producto->imagen) {
                 Storage::disk('public')->delete($producto->imagen);
             }
 
-            $producto->imagen = $request
-                ->file('imagen')
-                ->store('productos', 'public');
+            $producto->imagen = $request->file('imagen')->store('productos', 'public');
         }
 
         $producto->save();
@@ -126,14 +111,11 @@ class ProductoController extends Controller
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $producto = producto::find($id);
 
-        if ($producto == null) {
+        if (!$producto) {
             return response()->json([
                 "error" => "NO ENCONTRADO",
                 "status" => "ERROR"

@@ -8,128 +8,108 @@ use App\Models\tienda;
 
 class TiendaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-          $tienda=tienda::with(['emprendedor'])->get();
+        $tiendas = tienda::with(['emprendedor.usuario'])
+            ->orderBy('id', 'desc')
+            ->get();
+
         return response()->json([
-            "data"=>$tienda,
-            "status"=>"success"
-        ],200);
+            "data" => $tiendas,
+            "status" => "success"
+        ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        
-          $validated = $request->validate([
-        'emprendedor_id' => 'required|exists:emprendedores,id',
-        'nombre' => 'required|min:3|max:50',
-        'logo' => 'nullable|string',
-        'descripcion' => 'required|min:5',
-        'categoria' => 'required'
-    ]);
+        $validated = $request->validate([
+            'emprendedor_id' => 'required|exists:emprendedores,id',
+            'nombre' => 'required|min:3|max:150',
+            'logo' => 'required|string|max:255',
+            'descripcion' => 'required|min:5',
+            'categoria' => 'required|max:100'
+        ]);
 
-    $tienda = new tienda();
-    $tienda->emprendedor_id = $request->emprendedor_id;
-    $tienda->nombre = $request->nombre;
-    $tienda->logo = $request->logo;
-    $tienda->descripcion = $request->descripcion;
-    $tienda->categoria = $request->categoria;
+        $tienda = tienda::create([
+            'emprendedor_id' => $request->emprendedor_id,
+            'nombre' => $request->nombre,
+            'logo' => $request->logo,
+            'descripcion' => $request->descripcion,
+            'categoria' => $request->categoria,
+        ]);
 
-    $tienda->save();
-
-    return response()->json([
-        "data" => $tienda,
-        "status" => "success"
-    ], 201);
+        return response()->json([
+            "data" => $tienda,
+            "status" => "success"
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        $tienda=tienda::find($id);
-        if($tienda == null){
+        $tienda = tienda::with(['emprendedor.usuario'])->find($id);
+
+        if ($tienda == null) {
             return response()->json([
-                "message"=>"tienda no encontrada",
-                "status"=>"Error"
-            ],404);
+                "message" => "tienda no encontrada",
+                "status" => "Error"
+            ], 404);
         }
+
         return response()->json([
-            "data"=>$tienda,
-            "status"=>"Success"
-        ],200);
+            "data" => $tienda,
+            "status" => "Success"
+        ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        
-        
-          $validated = $request->validate([
-        'emprendedor_id' => 'required|exists:emprendedores,id',
-        'nombre' => 'required|min:3|max:50',
-        'logo' => 'nullable|string',
-        'descripcion' => 'required|min:5',
-        'categoria' => 'required'
-    ]);
+        $tienda = tienda::find($id);
 
-   $tienda = tienda::find($id);
-    $tienda->emprendedor_id = $request->emprendedor_id;
-    $tienda->nombre = $request->nombre;
-    $tienda->logo = $request->logo;
-    $tienda->descripcion = $request->descripcion;
-    $tienda->categoria = $request->categoria;
+        if ($tienda == null) {
+            return response()->json([
+                "message" => "tienda no encontrada",
+                "status" => "Error"
+            ], 404);
+        }
 
-    $tienda->save();
+        $validated = $request->validate([
+            'emprendedor_id' => 'required|exists:emprendedores,id',
+            'nombre' => 'required|min:3|max:150',
+            'logo' => 'required|string|max:255',
+            'descripcion' => 'required|min:5',
+            'categoria' => 'required|max:100'
+        ]);
 
-    return response()->json([
-        "data" => $tienda,
-        "status" => "success"
-    ], 201);
+        $tienda->update([
+            'emprendedor_id' => $request->emprendedor_id,
+            'nombre' => $request->nombre,
+            'logo' => $request->logo,
+            'descripcion' => $request->descripcion,
+            'categoria' => $request->categoria,
+        ]);
+
+        return response()->json([
+            "data" => $tienda,
+            "status" => "success"
+        ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        
-           $tienda = tienda::find($id);
-        if($tienda == null){
+        $tienda = tienda::find($id);
+
+        if ($tienda == null) {
             return response()->json([
-                "error"=>"NO ENCONTRADO",
-                "status"=>"ERROR"
-            ],404);
+                "error" => "NO ENCONTRADO",
+                "status" => "ERROR"
+            ], 404);
         }
+
         $tienda->delete();
+
         return response()->json([
-            "status"=>"Success",
-            "message"=>"Registro eliminado correctamente"
-        ],204);
+            "status" => "Success",
+            "message" => "Registro eliminado correctamente"
+        ], 200);
     }
 }

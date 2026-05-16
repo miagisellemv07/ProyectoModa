@@ -35,11 +35,21 @@ function Productos() {
 
   function obtenerImagen(producto){
 
-    if(producto.imagen){
-      return `http://127.0.0.1:8000/storage/${producto.imagen}`;
+    if(!producto.imagen){
+      return "https://via.placeholder.com/400x300";
     }
 
-    return "https://via.placeholder.com/400x300";
+    const imagen = producto.imagen.replace(/^\/+/, "");
+
+    if(imagen.startsWith("http")){
+      return imagen;
+    }
+
+    if(imagen.startsWith("storage/")){
+      return `http://127.0.0.1:8000/${imagen}`;
+    }
+
+    return `http://127.0.0.1:8000/storage/${imagen}`;
 
   }
 

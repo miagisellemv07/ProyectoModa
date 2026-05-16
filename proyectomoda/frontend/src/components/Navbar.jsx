@@ -1,18 +1,67 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  function irASeccion(id) {
+    if (window.location.pathname !== "/") {
+      navigate("/");
+
+      setTimeout(() => {
+        const seccion = document.getElementById(id);
+
+        if (seccion) {
+          seccion.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 200);
+
+      return;
+    }
+
+    const seccion = document.getElementById(id);
+
+    if (seccion) {
+      seccion.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }
+
+  function obtenerPanel() {
+    if (!user) return "/login";
+
+    if (user.rol === "admin") {
+      return "/dashboard/admin";
+    }
+
+    if (user.rol === "emprendedor") {
+      return "/dashboard/emprendedor";
+    }
+
+    if (user.rol === "cliente") {
+      return "/dashboard/cliente";
+    }
+
+    return "/";
+  }
+
+  function cerrarSesion() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  }
+
   return (
     <nav className="navbar navbar-expand-lg navbar-custom py-3">
-
       <div className="container">
-
-        <Link
-          className="navbar-brand"
-          to="/"
-        >
+        <Link className="navbar-brand" to="/">
           Virtuality <span>Mall</span>
         </Link>
-
 
         <button
           className="navbar-toggler border-0 shadow-none"
@@ -23,78 +72,94 @@ function Navbar() {
           <i className="fas fa-bars"></i>
         </button>
 
-
-        <div
-          className="collapse navbar-collapse"
-          id="navbarMall"
-        >
-
+        <div className="collapse navbar-collapse" id="navbarMall">
           <ul className="navbar-nav ms-auto align-items-lg-center">
-
             <li className="nav-item">
               <Link className="nav-link" to="/">
                 Inicio
               </Link>
             </li>
 
-
             <li className="nav-item">
-              <a className="nav-link" href="#productos">
+              <Link className="nav-link" to="/productos">
                 Productos
-              </a>
+              </Link>
             </li>
 
-
             <li className="nav-item">
-              <a className="nav-link" href="#categorias">
+              <button
+                type="button"
+                className="nav-link border-0 bg-transparent"
+                onClick={() => irASeccion("categorias")}
+              >
                 Categorías
-              </a>
+              </button>
             </li>
 
-
             <li className="nav-item">
-              <a className="nav-link" href="#beneficios">
+              <button
+                type="button"
+                className="nav-link border-0 bg-transparent"
+                onClick={() => irASeccion("beneficios")}
+              >
                 Beneficios
-              </a>
+              </button>
             </li>
 
-
             <li className="nav-item">
-              <a className="nav-link" href="#contacto">
+              <button
+                type="button"
+                className="nav-link border-0 bg-transparent"
+                onClick={() => irASeccion("contacto")}
+              >
                 Contacto
-              </a>
+              </button>
             </li>
 
+            {!user && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/login">
+                    Iniciar sesión
+                  </Link>
+                </li>
 
-            <li className="nav-item">
+                <li className="nav-item">
+                  <Link className="nav-link" to="/register">
+                    Registrarse
+                  </Link>
+                </li>
+              </>
+            )}
 
-              <Link
-                className="nav-link"
-                to="/login"
-              >
-                Iniciar sesión
-              </Link>
+            {user && (
+              <>
+                <li className="nav-item">
+                  <span className="nav-link">
+                    Hola, {user.nombre || user.name}
+                  </span>
+                </li>
 
-            </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to={obtenerPanel()}>
+                    Mi panel
+                  </Link>
+                </li>
 
-
-            <li className="nav-item">
-
-              <Link
-                className="nav-link"
-                to="/register"
-              >
-                Registrarse
-              </Link>
-
-            </li>
-
+                <li className="nav-item">
+                  <button
+                    type="button"
+                    onClick={cerrarSesion}
+                    className="nav-link border-0 bg-transparent"
+                  >
+                    Cerrar sesión
+                  </button>
+                </li>
+              </>
+            )}
           </ul>
-
         </div>
-
       </div>
-
     </nav>
   );
 }

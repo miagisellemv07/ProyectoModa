@@ -3,143 +3,196 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\emprendedore;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class EmprendedoreController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
-        $emprendedores = emprendedore::with('usuario_id')->get();
 
-        return response([
-            'success' => true,
-            'message' => $emprendedores->isEmpty() ? 'No emprendedores found' : 'Emprendedores retrieved successfully',
-            'emprendedores' => $emprendedores
-        ], 200);
+        $emprendedores =
+        User::with('emprendedor')
+        ->where('rol','emprendedor')
+        ->get();
+
+        return response()->json([
+            "success"=>true,
+            "emprendedores"=>$emprendedores
+        ]);
+
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+
+
+    public function show($id)
     {
-        return response([
-            'success' => true,
-            'msg' => 'Form for creating emprendedore (API usually does not need this)'
-        ], 200);
+
+        $usuario =
+        User::with('emprendedor')
+        ->findOrFail($id);
+
+        return response()->json($usuario);
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
+
     public function store(Request $request)
     {
-        $validateData = $request->validate([
-            'usuario_id' => 'required|exists:users,id',
-            'nombre_marca' => 'required|string|max:255',
+
+        $request->validate([
+
+            "nombre"=>"required",
+            "apellido"=>"required",
+
+            "email"=>
+            "required|email|unique:users",
+
+            "tel"=>"required",
+
+            "password"=>
+            "required|confirmed",
+
+            "nombre_marca"=>
+            "required"
+
         ]);
 
-        $emprendedore = emprendedore::create($validateData);
 
-        return response([
-            'success' => true,
-            'msg' => 'Emprendedore created successfully',
-            'emprendedore' => $emprendedore
-        ], 201);
-    }
+        $usuario =
+        User::create([
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $emprendedore = emprendedore::with('usuario_id')->find($id);
+            "nombre"=>$request->nombre,
 
-        if (!$emprendedore) {
-            return response([
-                'success' => false,
-                'msg' => 'Emprendedore not found'
-            ], 404);
-        }
+            "apellido"=>$request->apellido,
 
-        return response([
-            'success' => true,
-            'emprendedore' => $emprendedore
-        ], 200);
-    }
+            "email"=>$request->email,
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $emprendedore = emprendedore::find($id);
+            "tel"=>$request->tel,
 
-        if (!$emprendedore) {
-            return response([
-                'success' => false,
-                'msg' => 'Emprendedore not found'
-            ], 404);
-        }
+            "rol"=>"emprendedor",
 
-        return response([
-            'success' => true,
-            'msg' => 'Form for editing emprendedore (API usually does not need this)',
-            'emprendedore' => $emprendedore
-        ], 200);
-    }
+            "password"=>
+            Hash::make(
+            $request->password
+            )
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $emprendedore = emprendedore::find($id);
-
-        if (!$emprendedore) {
-            return response([
-                'success' => false,
-                'msg' => 'Emprendedore not found'
-            ], 404);
-        }
-
-        $validateData = $request->validate([
-            'usuario_id' => 'sometimes|required|exists:users,id',
-            'nombre_marca' => 'sometimes|required|string|max:255',
         ]);
 
-        $emprendedore->update($validateData);
 
-        return response([
-            'success' => true,
-            'msg' => 'Emprendedore updated successfully',
-            'emprendedore' => $emprendedore
-        ], 200);
+        emprendedore::create([
+
+            "usuario_id"=>
+            $usuario->id,
+
+            "nombre_marca"=>
+            $request->nombre_marca
+
+        ]);
+
+
+        return response()->json([
+            "success"=>true
+        ]);
+
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+
+
+    public function update(
+        Request $request,
+        $id
+    ){
+
+        $usuario =
+        User::findOrFail($id);
+
+
+        $request->validate([
+
+            "nombre"=>"required",
+
+            "apellido"=>"required",
+
+            "email"=>[
+                "required",
+                "email",
+
+                Rule::unique(
+                    "users"
+                )->ignore(
+                    $usuario->id
+                )
+            ],
+
+            "tel"=>"required",
+
+            "nombre_marca"=>
+            "required"
+
+        ]);
+
+
+        $usuario->update([
+
+            "nombre"=>
+            $request->nombre,
+
+            "apellido"=>
+            $request->apellido,
+
+            "email"=>
+            $request->email,
+
+            "tel"=>
+            $request->tel
+
+        ]);
+
+
+        $usuario
+        ->emprendedor
+        ->update([
+
+            "nombre_marca"=>
+            $request->nombre_marca
+
+        ]);
+
+
+        return response()->json([
+            "success"=>true
+        ]);
+
+    }
+
+
+
+    public function destroy($id)
     {
-        $emprendedore = emprendedore::find($id);
 
-        if (!$emprendedore) {
-            return response([
-                'success' => false,
-                'msg' => 'Emprendedore not found'
-            ], 404);
-        }
+        $usuario =
+        User::findOrFail($id);
 
-        $emprendedore->delete();
+        $usuario
+        ->emprendedor()
+        ->delete();
 
-        return response([
-            'success' => true,
-            'msg' => 'Emprendedore deleted successfully'
-        ], 200);
+        $usuario
+        ->delete();
+
+
+        return response()->json([
+
+            "success"=>true
+
+        ]);
+
     }
+
 }

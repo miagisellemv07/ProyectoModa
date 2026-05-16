@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 import DashboardLayout from "./layouts/DashboardLayout";
+import DashboardHome from "./pages/dashboard/DashboardHome";
 
 import AdminClientes from "./pages/dashboard/AdminClientes";
 import AdminTiendas from "./pages/dashboard/AdminTiendas";
@@ -21,15 +22,13 @@ import ClientePagos from "./pages/dashboard/ClientePagos";
 
 import EmprendedorPedidos from "./pages/dashboard/EmprendedorPedidos";
 import EmprendedorPagos from "./pages/dashboard/EmprendedorPagos";
-import EmprendedorProductos
-from "./pages/dashboard/EmprendedorProductos";
+import EmprendedorProductos from "./pages/dashboard/EmprendedorProductos";
 
 import "./styles/auth.css";
 
 function App() {
   return (
     <BrowserRouter>
-
       <Routes>
 
         <Route
@@ -88,6 +87,11 @@ function App() {
         />
 
         <Route path="/dashboard" element={<DashboardLayout />}>
+
+          <Route path="admin" element={<DashboardHome />} />
+          <Route path="cliente" element={<DashboardHome />} />
+          <Route path="emprendedor" element={<DashboardHome />} />
+
           <Route path="admin/clientes" element={<AdminClientes />} />
           <Route path="admin/tiendas" element={<AdminTiendas />} />
           <Route path="admin/usuarios" element={<AdminUsuarios />} />
@@ -95,14 +99,13 @@ function App() {
           <Route path="cliente/compras" element={<ClienteCompras />} />
           <Route path="cliente/pagos" element={<ClientePagos />} />
 
+          <Route path="emprendedor/productos" element={<EmprendedorProductos />} />
           <Route path="emprendedor/pedidos" element={<EmprendedorPedidos />} />
           <Route path="emprendedor/pagos" element={<EmprendedorPagos />} />
-          <Route path="emprendedor/productos" element={<EmprendedorProductos />}
-/>
+
         </Route>
 
       </Routes>
-
     </BrowserRouter>
   );
 }

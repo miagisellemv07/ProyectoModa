@@ -3,136 +3,228 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $user = User::all();
+        $usuarios = User::orderBy('id', 'desc')->get();
 
         return response()->json([
-            "data" => $user,
+            "data" => $usuarios,
             "status" => "success"
         ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-         $valideted = $request->validate([
-        'nombre'=>'required|min:3|max:30',
-        'apellido'=>'required|min:3|max:30',
-        'email'=>'required|email',
-        'password'=>'required|min:4',
-        'tel'=>'required',
-        'rol'=>'required',
+        $request->validate([
+            'nombre' => ['required', 'string', 'max:100'],
+            'apellido' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:150', 'unique:users,email'],
+            'tel' => ['nullable', 'string', 'max:20'],
+            'rol' => ['required', Rule::in(['admin', 'emprendedor', 'cliente'])],
+            'password' => ['required', 'string', 'confirmed'],
         ]);
-        $user =new User();
-        $user->nombre=$request->nombre;
-        $user->apellido=$request->apellido;
-        $user->email=$request->email;
-        $user->password=Hash::make($request->password);
-        $user->tel=$request->tel;
-        $user->rol=$request->rol;
 
-        $user->save();
+        $usuario = User::create([
+            'nombre' => $request->nombre,
+            'apellido' => $request->apellido,
+            'email' => $request->email,
+            'tel' => $request->tel,
+            'rol' => $request->rol,
+            'password' => Hash::make($request->password),
+        ]);
 
         return response()->json([
-            "data"=>$user,
-            "status"=>"success"
-        ],201);
+            "data" => $usuario,
+            "status" => "success"
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-         $user=User::find($id);
-        if($user == null){
+        $usuario = User::find($id);
+
+        if (!$usuario) {
             return response()->json([
-                "message"=>"Usuario no encontrado",
-                "status"=>"Error"
-            ],404);
+                "message" => "Usuario no encontrado",
+                "status" => "error"
+            ], 404);
         }
+
         return response()->json([
-            "data"=>$user,
-            "status"=>"Success"
-        ],200);
+            "data" => $usuario,
+            "status" => "success"
+        ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        
-         $valideted = $request->validate([
-        'nombre'=>'required|min:3|max:30',
-        'apellido'=>'required|min:3|max:30',
-        'email'=>'required|email',
-        'password'=>'required|min:4',
-        'tel'=>'required',
-        'rol'=>'required',
-        ]);
-        $user = User::find($id);
-        $user->nombre=$request->nombre;
-        $user->apellido=$request->apellido;
-        $user->email=$request->email;
-        $user->password=Hash::make($request->password);
-        $user->tel=$request->tel;
-        $user->rol=$request->rol;
+        $usuario = User::find($id);
 
-        $user->save();
+        if (!$usuario) {
+            return response()->json([
+                "message" => "Usuario no encontrado",
+                "status" => "error"
+            ], 404);
+        }
+
+        $request->validate([
+            'nombre' => ['required', 'string', 'max:100'],
+            'apellido' => ['required', 'string', 'max:100'],
+            'email' => [
+                'required',
+                'email',
+                'max:150',
+                Rule::unique('users', 'email')->ignore($usuario->id)
+            ],
+            'tel' => ['nullable', 'string', 'max:20'],
+            'rol' => ['required', Rule::in(['admin', 'emprendedor', 'cliente'])],
+            'password' => ['nullable', 'string', 'confirmed'],
+        ]);
+
+        $usuario->nombre = $request->nombre;
+        $usuario->apellido = $request->apellido;
+        $usuario->email = $request->email;
+        $usuario->tel = $request->tel;
+        $usuario->rol = $request->rol;
+
+        if ($request->filled('password')) {
+            $usuario->password = Hash::make($request->password);
+        }
+
+        $usuario->save();
 
         return response()->json([
-            "data"=>$user,
-            "status"=>"success"
-        ],201);
-
+            "data" => $usuario,
+            "status" => "success"
+        ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-           $user = User::find($id);
-        if($user == null){
+        $usuario = User::find($id);
+
+        if (!$usuario) {
             return response()->json([
-                "error"=>"USUARIO NO ENCONTRADO",
-                "status"=>"ERROR"
-            ],404);
+                "error" => "USUARIO NO ENCONTRADO",
+                "status" => "error"
+            ], 404);
         }
-        $user->delete();
+
+        DB::transaction(function () use ($usuario) {
+            $clienteIds = DB::table('clientes')
+                ->where('usuario_id', $usuario->id)
+                ->pluck('id')
+                ->all();
+
+            if (!empty($clienteIds)) {
+                DB::table('carritos')
+                    ->whereIn('cliente_id', $clienteIds)
+                    ->delete();
+
+                $ordenIds = DB::table('ordenes')
+                    ->whereIn('cliente_id', $clienteIds)
+                    ->pluck('id')
+                    ->all();
+
+                if (!empty($ordenIds)) {
+                    DB::table('ordenitems')
+                        ->whereIn('orden_id', $ordenIds)
+                        ->delete();
+
+                    DB::table('pagoordenes')
+                        ->whereIn('orden_id', $ordenIds)
+                        ->delete();
+
+                    DB::table('ordenes')
+                        ->whereIn('id', $ordenIds)
+                        ->delete();
+                }
+
+                DB::table('clientes')
+                    ->whereIn('id', $clienteIds)
+                    ->delete();
+            }
+
+            $emprendedorIds = DB::table('emprendedores')
+                ->where('usuario_id', $usuario->id)
+                ->pluck('id')
+                ->all();
+
+            if (!empty($emprendedorIds)) {
+                $tiendaIds = DB::table('tiendas')
+                    ->whereIn('emprendedor_id', $emprendedorIds)
+                    ->pluck('id')
+                    ->all();
+
+                if (!empty($tiendaIds)) {
+                    $suscripcionIds = DB::table('suscripciones')
+                        ->whereIn('tienda_id', $tiendaIds)
+                        ->pluck('id')
+                        ->all();
+
+                    if (!empty($suscripcionIds)) {
+                        DB::table('pagosuscripciones')
+                            ->whereIn('suscripcion_id', $suscripcionIds)
+                            ->delete();
+
+                        DB::table('suscripciones')
+                            ->whereIn('id', $suscripcionIds)
+                            ->delete();
+                    }
+
+                    $productoIds = DB::table('productos')
+                        ->whereIn('tienda_id', $tiendaIds)
+                        ->pluck('id')
+                        ->all();
+
+                    if (!empty($productoIds)) {
+                        DB::table('carritos')
+                            ->whereIn('producto_id', $productoIds)
+                            ->delete();
+
+                        DB::table('ordenitems')
+                            ->whereIn('producto_id', $productoIds)
+                            ->delete();
+
+                        DB::table('productos')
+                            ->whereIn('id', $productoIds)
+                            ->delete();
+                    }
+
+                    DB::table('ordenitems')
+                        ->whereIn('tienda_id', $tiendaIds)
+                        ->delete();
+
+                    DB::table('tiendas')
+                        ->whereIn('id', $tiendaIds)
+                        ->delete();
+                }
+
+                DB::table('emprendedores')
+                    ->whereIn('id', $emprendedorIds)
+                    ->delete();
+            }
+
+            DB::table('sessions')
+                ->where('user_id', $usuario->id)
+                ->delete();
+
+            DB::table('users')
+                ->where('id', $usuario->id)
+                ->delete();
+        });
+
         return response()->json([
-            "status"=>"Success",
-            "message"=>"Registro eliminado correctamente"
-        ],204);
+            "status" => "success",
+            "message" => "Registro eliminado correctamente"
+        ], 200);
     }
 }

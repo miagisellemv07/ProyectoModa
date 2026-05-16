@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 
 function Home() {
-
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/productos")
-      .then(res => res.json())
-      .then(data => {
-        setProductos(data.data.slice(0, 3));
+      .then((res) => res.json())
+      .then((data) => {
+        setProductos((data.data || []).slice(0, 3));
       });
   }, []);
 
@@ -17,17 +16,26 @@ function Home() {
   };
 
   const irALogin = () => {
-    window.location.href = "http://127.0.0.1:8000/login";
+    window.location.href = "/login";
   };
+
+  function obtenerImagen(producto) {
+    if (!producto.imagen) {
+      return "https://via.placeholder.com/400";
+    }
+
+    if (producto.imagen.startsWith("http")) {
+      return producto.imagen;
+    }
+
+    return `http://127.0.0.1:8000/storage/${producto.imagen}`;
+  }
 
   return (
     <>
-
-      {/* HERO */}
       <section className="hero-section">
         <div className="container">
           <div className="row align-items-center g-5">
-
             <div className="col-lg-6">
               <span className="hero-badge">
                 Marketplace moderno y accesible
@@ -60,15 +68,12 @@ function Home() {
                 />
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* BENEFICIOS */}
-      <section className="section-padding">
+      <section className="section-padding" id="beneficios">
         <div className="container text-center">
-
           <span className="hero-badge mb-3">
             ¿Por qué elegir Virtuality Mall?
           </span>
@@ -81,7 +86,7 @@ function Home() {
             className="section-subtitle"
             style={{
               maxWidth: "850px",
-              margin: "0 auto 60px"
+              margin: "0 auto 60px",
             }}
           >
             Nuestro marketplace ayuda a emprendedores a mostrar productos,
@@ -90,15 +95,11 @@ function Home() {
           </p>
 
           <div className="row g-4">
-
             <div className="col-md-6 col-lg-3">
               <div className="card-soft h-100 p-4">
                 <i
                   className="bi bi-shop-window"
-                  style={{
-                    fontSize: "52px",
-                    color: "#9f7cd0"
-                  }}
+                  style={{ fontSize: "52px", color: "#9f7cd0" }}
                 ></i>
 
                 <h4 className="fw-bold mt-4 mb-3">
@@ -121,10 +122,7 @@ function Home() {
               <div className="card-soft h-100 p-4">
                 <i
                   className="bi bi-cart3"
-                  style={{
-                    fontSize: "52px",
-                    color: "#9f7cd0"
-                  }}
+                  style={{ fontSize: "52px", color: "#9f7cd0" }}
                 ></i>
 
                 <h4 className="fw-bold mt-4 mb-3">
@@ -147,10 +145,7 @@ function Home() {
               <div className="card-soft h-100 p-4">
                 <i
                   className="bi bi-tags"
-                  style={{
-                    fontSize: "52px",
-                    color: "#9f7cd0"
-                  }}
+                  style={{ fontSize: "52px", color: "#9f7cd0" }}
                 ></i>
 
                 <h4 className="fw-bold mt-4 mb-3">
@@ -173,10 +168,7 @@ function Home() {
               <div className="card-soft h-100 p-4">
                 <i
                   className="bi bi-graph-up-arrow"
-                  style={{
-                    fontSize: "52px",
-                    color: "#9f7cd0"
-                  }}
+                  style={{ fontSize: "52px", color: "#9f7cd0" }}
                 ></i>
 
                 <h4 className="fw-bold mt-4 mb-3">
@@ -194,16 +186,12 @@ function Home() {
                 </small>
               </div>
             </div>
-
           </div>
-
         </div>
       </section>
 
-      {/* PRODUCTOS REALES */}
       <section className="section-padding bg-white" id="productos">
         <div className="container">
-
           <div className="text-center">
             <h2 className="section-title">
               Productos destacados
@@ -215,18 +203,10 @@ function Home() {
           </div>
 
           <div className="row g-4">
-            {productos.map(producto => (
+            {productos.map((producto) => (
               <div className="col-md-6 col-lg-4" key={producto.id}>
                 <div className="product-card">
-
-                  <img
-                    src={
-                      producto.imagen
-                        ? `http://127.0.0.1:8000/storage/${producto.imagen}`
-                        : "https://via.placeholder.com/400"
-                    }
-                    alt={producto.nombre}
-                  />
+                  <img src={obtenerImagen(producto)} alt={producto.nombre} />
 
                   <div className="product-body">
                     <span className="category-badge">
@@ -237,9 +217,7 @@ function Home() {
                       {producto.nombre}
                     </h4>
 
-                    <p>
-                      {producto.descripcion}
-                    </p>
+                    <p>{producto.descripcion}</p>
 
                     <div className="price">
                       ${producto.precio} MXN
@@ -249,22 +227,17 @@ function Home() {
                       Vendedor: {producto.tienda?.nombre || "Sin tienda"}
                     </small>
                   </div>
-
                 </div>
               </div>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-padding">
+      <section className="section-padding" id="categorias">
         <div className="container">
-
           <div className="cta-section">
             <div className="row align-items-center g-4">
-
               <div className="col-lg-8">
                 <h2>
                   Categorías para todo negocio
@@ -276,17 +249,48 @@ function Home() {
               </div>
 
               <div className="col-lg-4 text-lg-end">
-                <button className="btn btn-main" onClick={irALogin}>
-                  Iniciar sesión
+                <button className="btn btn-main" onClick={irAProductos}>
+                  Ver productos
                 </button>
               </div>
-
             </div>
           </div>
-
         </div>
       </section>
 
+      <section
+        className="bg-white"
+        id="contacto"
+        style={{
+          padding: "80px 0",
+        }}
+      >
+        <div className="container text-center">
+          <span className="hero-badge mb-3">
+            Contacto
+          </span>
+
+          <h2
+            className="section-title"
+            style={{
+              marginBottom: "20px",
+            }}
+          >
+            ¿Necesitas más información?
+          </h2>
+
+          <p
+            className="section-subtitle"
+            style={{
+              maxWidth: "700px",
+              margin: "0 auto",
+            }}
+          >
+            Ponte en contacto con Virtuality Mall para conocer más sobre tiendas,
+            productos y oportunidades para emprendedores.
+          </p>
+        </div>
+      </section>
     </>
   );
 }
