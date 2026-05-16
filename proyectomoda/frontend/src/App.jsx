@@ -7,9 +7,13 @@ import Home from "./pages/Home";
 import Productos from "./pages/Productos";
 import DetalleProducto from "./pages/DetalleProducto";
 
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
+import "./styles/auth.css";
+
 function App() {
   return (
-
     <BrowserRouter>
 
       <Navbar />
@@ -31,12 +35,23 @@ function App() {
           element={<DetalleProducto />}
         />
 
+        {/* NUEVAS RUTAS */}
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
       </Routes>
 
       <Footer />
 
     </BrowserRouter>
-
   );
 }
 
