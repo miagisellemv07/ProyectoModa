@@ -9,9 +9,14 @@
 @include('productos._errors')
 
 <div class="table-card">
-    <form action="{{ route('productos.update', $producto->id) }}" method="POST">
+    <form
+        action="{{ route('productos.update', $producto->id) }}"
+        method="POST"
+        enctype="multipart/form-data"
+    >
         @csrf
         @method('PUT')
+
         @include('productos._form')
 
         <div class="d-flex gap-2">

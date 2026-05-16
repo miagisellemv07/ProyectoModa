@@ -7,6 +7,7 @@ use App\Models\tienda;
 use App\Models\emprendedore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProductoController extends Controller
 {
@@ -69,6 +70,7 @@ class ProductoController extends Controller
             'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'tienda_id' => 'required|exists:tiendas,id',
+            'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
             'descripcion.required' => 'La descripción es obligatoria.',
@@ -78,19 +80,28 @@ class ProductoController extends Controller
             'stock.integer' => 'El stock debe ser un número entero.',
             'tienda_id.required' => 'La tienda es obligatoria.',
             'tienda_id.exists' => 'La tienda seleccionada no existe.',
+            'imagen.image' => 'El archivo debe ser una imagen.',
+            'imagen.mimes' => 'La imagen debe ser jpg, jpeg, png o webp.',
+            'imagen.max' => 'La imagen no debe pesar más de 2MB.',
         ]);
 
         $tienda = tienda::where('id', $request->tienda_id)
             ->where('emprendedor_id', $emprendedor->id)
             ->firstOrFail();
 
-        producto::create([
+        $datos = [
             'nombre' => $request->nombre,
             'descripcion' => $request->descripcion,
             'precio' => $request->precio,
             'stock' => $request->stock,
             'tienda_id' => $tienda->id,
-        ]);
+        ];
+
+        if ($request->hasFile('imagen')) {
+            $datos['imagen'] = $request->file('imagen')->store('productos', 'public');
+        }
+
+        producto::create($datos);
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto creado correctamente.');
@@ -123,6 +134,7 @@ class ProductoController extends Controller
             'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'tienda_id' => 'required|exists:tiendas,id',
+            'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
             'descripcion.required' => 'La descripción es obligatoria.',
@@ -132,19 +144,32 @@ class ProductoController extends Controller
             'stock.integer' => 'El stock debe ser un número entero.',
             'tienda_id.required' => 'La tienda es obligatoria.',
             'tienda_id.exists' => 'La tienda seleccionada no existe.',
+            'imagen.image' => 'El archivo debe ser una imagen.',
+            'imagen.mimes' => 'La imagen debe ser jpg, jpeg, png o webp.',
+            'imagen.max' => 'La imagen no debe pesar más de 2MB.',
         ]);
 
         $tienda = tienda::where('id', $request->tienda_id)
             ->where('emprendedor_id', $emprendedor->id)
             ->firstOrFail();
 
-        $producto->update([
+        $datos = [
             'nombre' => $request->nombre,
             'descripcion' => $request->descripcion,
             'precio' => $request->precio,
             'stock' => $request->stock,
             'tienda_id' => $tienda->id,
-        ]);
+        ];
+
+        if ($request->hasFile('imagen')) {
+            if ($producto->imagen) {
+                Storage::disk('public')->delete($producto->imagen);
+            }
+
+            $datos['imagen'] = $request->file('imagen')->store('productos', 'public');
+        }
+
+        $producto->update($datos);
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto actualizado correctamente.');
@@ -153,6 +178,11 @@ class ProductoController extends Controller
     public function destroy(string $id)
     {
         $producto = $this->productoDelEmprendedor($id);
+
+        if ($producto->imagen) {
+            Storage::disk('public')->delete($producto->imagen);
+        }
+
         $producto->delete();
 
         return redirect()->route('productos.index')

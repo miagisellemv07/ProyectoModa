@@ -1,4 +1,25 @@
+import { useEffect, useState } from "react";
+
 function Home() {
+
+  const [productos, setProductos] = useState([]);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/productos")
+      .then(res => res.json())
+      .then(data => {
+        setProductos(data.data.slice(0, 3));
+      });
+  }, []);
+
+  const irAProductos = () => {
+    window.location.href = "/productos";
+  };
+
+  const irALogin = () => {
+    window.location.href = "http://127.0.0.1:8000/login";
+  };
+
   return (
     <>
 
@@ -17,28 +38,24 @@ function Home() {
               </h1>
 
               <p className="hero-text mb-4">
-                Virtuality Emprendedores Mall es una plataforma donde diferentes
-                negocios pueden mostrar sus productos y los clientes pueden comprar
-                de forma sencilla, ordenada y visual.
+                Virtuality Emprendedores Mall es una plataforma donde diferentes negocios pueden mostrar sus productos y los clientes pueden comprar de forma sencilla.
               </p>
 
               <div className="d-flex flex-wrap gap-3">
-
-                <button className="btn btn-main">
+                <button className="btn btn-main" onClick={irAProductos}>
                   Explorar productos
                 </button>
 
-                <button className="btn btn-soft">
+                <button className="btn btn-soft" onClick={irALogin}>
                   Iniciar sesión
                 </button>
-
               </div>
             </div>
 
             <div className="col-lg-6">
               <div className="hero-image">
                 <img
-                  src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=900&q=80"
+                  src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b"
                   alt="Marketplace"
                 />
               </div>
@@ -49,97 +66,141 @@ function Home() {
       </section>
 
       {/* BENEFICIOS */}
-      <section className="section-padding" id="beneficios">
+      <section className="section-padding">
         <div className="container text-center">
+
+          <span className="hero-badge mb-3">
+            ¿Por qué elegir Virtuality Mall?
+          </span>
 
           <h2 className="section-title">
             Una experiencia moderna para vender y comprar
           </h2>
 
-          <p className="section-subtitle mx-auto">
-            El sistema está pensado para que tiendas y clientes puedan interactuar
-            de forma simple, visual y organizada dentro de una misma plataforma.
+          <p
+            className="section-subtitle"
+            style={{
+              maxWidth: "850px",
+              margin: "0 auto 60px"
+            }}
+          >
+            Nuestro marketplace ayuda a emprendedores a mostrar productos,
+            fortalecer su marca y llegar a más clientes mediante una experiencia
+            visual, organizada y fácil de usar.
           </p>
 
           <div className="row g-4">
 
             <div className="col-md-6 col-lg-3">
-              <div className="card-soft">
+              <div className="card-soft h-100 p-4">
+                <i
+                  className="bi bi-shop-window"
+                  style={{
+                    fontSize: "52px",
+                    color: "#9f7cd0"
+                  }}
+                ></i>
 
-                <div className="icon-circle mx-auto">
-                  <i className="fas fa-store"></i>
-                </div>
-
-                <h4 className="fw-bold mb-3">
+                <h4 className="fw-bold mt-4 mb-3">
                   Tiendas organizadas
                 </h4>
 
                 <p>
-                  Cada negocio puede mostrar sus productos dentro de un espacio propio.
+                  Cada negocio tiene su propio espacio para mostrar catálogo,
+                  productos, descripción y datos principales.
                 </p>
 
+                <small>
+                  ✓ Más orden <br />
+                  ✓ Mayor confianza
+                </small>
               </div>
             </div>
 
             <div className="col-md-6 col-lg-3">
-              <div className="card-soft">
+              <div className="card-soft h-100 p-4">
+                <i
+                  className="bi bi-cart3"
+                  style={{
+                    fontSize: "52px",
+                    color: "#9f7cd0"
+                  }}
+                ></i>
 
-                <div className="icon-circle mx-auto">
-                  <i className="fas fa-bag-shopping"></i>
-                </div>
-
-                <h4 className="fw-bold mb-3">
-                  Compras sencillas
+                <h4 className="fw-bold mt-4 mb-3">
+                  Compras rápidas
                 </h4>
 
                 <p>
-                  Los clientes pueden navegar, elegir y comprar de forma rápida.
+                  Los clientes pueden explorar productos, comparar precios,
+                  revisar inventario y comprar de forma sencilla.
                 </p>
 
+                <small>
+                  ✓ Navegación intuitiva <br />
+                  ✓ Compra sencilla
+                </small>
               </div>
             </div>
 
             <div className="col-md-6 col-lg-3">
-              <div className="card-soft">
+              <div className="card-soft h-100 p-4">
+                <i
+                  className="bi bi-tags"
+                  style={{
+                    fontSize: "52px",
+                    color: "#9f7cd0"
+                  }}
+                ></i>
 
-                <div className="icon-circle mx-auto">
-                  <i className="fas fa-tags"></i>
-                </div>
-
-                <h4 className="fw-bold mb-3">
-                  Variedad de categorías
+                <h4 className="fw-bold mt-4 mb-3">
+                  Más categorías
                 </h4>
 
                 <p>
-                  Tecnología, moda, accesorios, hogar, belleza, deporte y más.
+                  Moda, tecnología, accesorios, hogar, belleza y más productos
+                  reunidos en un solo marketplace.
                 </p>
 
+                <small>
+                  ✓ Mayor variedad <br />
+                  ✓ Todo en un mismo sitio
+                </small>
               </div>
             </div>
 
             <div className="col-md-6 col-lg-3">
-              <div className="card-soft">
+              <div className="card-soft h-100 p-4">
+                <i
+                  className="bi bi-graph-up-arrow"
+                  style={{
+                    fontSize: "52px",
+                    color: "#9f7cd0"
+                  }}
+                ></i>
 
-                <div className="icon-circle mx-auto">
-                  <i className="fas fa-chart-line"></i>
-                </div>
-
-                <h4 className="fw-bold mb-3">
-                  Impulso para negocios
+                <h4 className="fw-bold mt-4 mb-3">
+                  Impulso negocios
                 </h4>
 
                 <p>
-                  Una plataforma que ayuda a dar visibilidad y orden a cada tienda.
+                  La plataforma ayuda a emprendedores a ganar visibilidad,
+                  proyectar confianza y crecer digitalmente.
                 </p>
 
+                <small>
+                  ✓ Más alcance <br />
+                  ✓ Más oportunidades
+                </small>
               </div>
             </div>
 
           </div>
+
         </div>
       </section>
 
-      {/* PRODUCTOS */}
+      {/* PRODUCTOS REALES */}
       <section className="section-padding bg-white" id="productos">
         <div className="container">
 
@@ -148,135 +209,81 @@ function Home() {
               Productos destacados
             </h2>
 
-            <p className="section-subtitle mx-auto">
-              Aquí puedes mostrar una vista previa de todo lo que puede encontrarse dentro del marketplace.
+            <p className="section-subtitle">
+              Productos reales registrados en el marketplace.
             </p>
           </div>
 
           <div className="row g-4">
+            {productos.map(producto => (
+              <div className="col-md-6 col-lg-4" key={producto.id}>
+                <div className="product-card">
 
-            <div className="col-md-6 col-lg-4">
-              <div className="product-card">
+                  <img
+                    src={
+                      producto.imagen
+                        ? `http://127.0.0.1:8000/storage/${producto.imagen}`
+                        : "https://via.placeholder.com/400"
+                    }
+                    alt={producto.nombre}
+                  />
 
-                <img
-                  src="https://images.unsplash.com/photo-1483985988355-763728e1935b"
-                  alt=""
-                />
+                  <div className="product-body">
+                    <span className="category-badge">
+                      {producto.tienda?.categoria || "Producto"}
+                    </span>
 
-                <div className="product-body">
+                    <h4 className="fw-bold mt-2">
+                      {producto.nombre}
+                    </h4>
 
-                  <span className="category-badge">
-                    Moda
-                  </span>
+                    <p>
+                      {producto.descripcion}
+                    </p>
 
-                  <h4 className="fw-bold mt-2">
-                    Conjunto casual
-                  </h4>
+                    <div className="price">
+                      ${producto.precio} MXN
+                    </div>
 
-                  <p>
-                    Opciones cómodas y versátiles para diferentes estilos.
-                  </p>
-
-                  <div className="price">
-                    $399 MXN
+                    <small>
+                      Vendedor: {producto.tienda?.nombre || "Sin tienda"}
+                    </small>
                   </div>
 
                 </div>
               </div>
-            </div>
-
-            <div className="col-md-6 col-lg-4">
-              <div className="product-card">
-
-                <img
-                  src="https://images.unsplash.com/photo-1542291026-7eec264c27ff"
-                  alt=""
-                />
-
-                <div className="product-body">
-
-                  <span className="category-badge">
-                    Calzado
-                  </span>
-
-                  <h4 className="fw-bold mt-2">
-                    Tenis urbanos
-                  </h4>
-
-                  <p>
-                    Diseño moderno ideal para uso diario y distintos outfits.
-                  </p>
-
-                  <div className="price">
-                    $850 MXN
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-6 col-lg-4">
-              <div className="product-card">
-
-                <img
-                  src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e"
-                  alt=""
-                />
-
-                <div className="product-body">
-
-                  <span className="category-badge">
-                    Tecnología
-                  </span>
-
-                  <h4 className="fw-bold mt-2">
-                    Audífonos inalámbricos
-                  </h4>
-
-                  <p>
-                    Un ejemplo de cómo tu plataforma puede incluir todo tipo de productos.
-                  </p>
-
-                  <div className="price">
-                    $1,299 MXN
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
+            ))}
           </div>
+
         </div>
       </section>
 
       {/* CTA */}
-      <section className="section-padding" id="categorias">
+      <section className="section-padding">
         <div className="container">
 
           <div className="cta-section">
-
             <div className="row align-items-center g-4">
 
               <div className="col-lg-8">
-                <h2 className="section-title mb-3">
-                  Categorías para todo tipo de negocio
+                <h2>
+                  Categorías para todo negocio
                 </h2>
 
-                <p className="mb-0 hero-text">
-                  Virtuality Emprendedores Mall puede reunir tiendas de moda,
-                  calzado, accesorios, tecnología, hogar, belleza, deporte y mucho más.
+                <p>
+                  Moda, tecnología, hogar y más.
                 </p>
               </div>
 
               <div className="col-lg-4 text-lg-end">
-                <button className="btn btn-main">
+                <button className="btn btn-main" onClick={irALogin}>
                   Iniciar sesión
                 </button>
               </div>
 
             </div>
-
           </div>
+
         </div>
       </section>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\producto;
 
 class ProductoController extends Controller
@@ -22,14 +23,6 @@ class ProductoController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -39,15 +32,23 @@ class ProductoController extends Controller
             'descripcion' => 'required|min:5',
             'precio' => 'required|numeric',
             'stock' => 'required|integer',
-            'tienda_id' => 'required|exists:tiendas,id'
+            'tienda_id' => 'required|exists:tiendas,id',
+            'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);
 
         $producto = new producto();
+
         $producto->nombre = $request->nombre;
         $producto->descripcion = $request->descripcion;
         $producto->precio = $request->precio;
         $producto->stock = $request->stock;
         $producto->tienda_id = $request->tienda_id;
+
+        if ($request->hasFile('imagen')) {
+            $producto->imagen = $request
+                ->file('imagen')
+                ->store('productos', 'public');
+        }
 
         $producto->save();
 
@@ -78,26 +79,10 @@ class ProductoController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|min:3|max:50',
-            'descripcion' => 'required|min:5',
-            'precio' => 'required|numeric',
-            'stock' => 'required|integer',
-            'tienda_id' => 'required|exists:tiendas,id'
-        ]);
-
         $producto = producto::find($id);
 
         if ($producto == null) {
@@ -107,11 +92,31 @@ class ProductoController extends Controller
             ], 404);
         }
 
+        $validated = $request->validate([
+            'nombre' => 'required|min:3|max:50',
+            'descripcion' => 'required|min:5',
+            'precio' => 'required|numeric',
+            'stock' => 'required|integer',
+            'tienda_id' => 'required|exists:tiendas,id',
+            'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+        ]);
+
         $producto->nombre = $request->nombre;
         $producto->descripcion = $request->descripcion;
         $producto->precio = $request->precio;
         $producto->stock = $request->stock;
         $producto->tienda_id = $request->tienda_id;
+
+        if ($request->hasFile('imagen')) {
+
+            if ($producto->imagen) {
+                Storage::disk('public')->delete($producto->imagen);
+            }
+
+            $producto->imagen = $request
+                ->file('imagen')
+                ->store('productos', 'public');
+        }
 
         $producto->save();
 
@@ -133,6 +138,10 @@ class ProductoController extends Controller
                 "error" => "NO ENCONTRADO",
                 "status" => "ERROR"
             ], 404);
+        }
+
+        if ($producto->imagen) {
+            Storage::disk('public')->delete($producto->imagen);
         }
 
         $producto->delete();

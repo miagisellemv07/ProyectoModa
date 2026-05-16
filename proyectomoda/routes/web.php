@@ -44,7 +44,7 @@ Route::middleware(['auth'])->group(function () {
             return view('dash.pagos');
         })->name('dashboard.pagos');
     });
-
+    
     Route::middleware(['role:cliente'])->group(function () {
         Route::get('/dashboard/compras', function () {
             return view('dash.compras');
