@@ -43,6 +43,10 @@ function Productos() {
 
   }
 
+  function verDetalle(producto) {
+    window.location.href = `/productos/${producto.id}`;
+  }
+
   const filtrados =
     productos.filter(p =>
       p.nombre
@@ -294,6 +298,40 @@ cursor:"pointer"
 >
 
 Agregar al carrito
+
+</button>
+
+
+
+<button
+
+onClick={() => verDetalle(producto)}
+
+style={{
+
+width:"100%",
+
+padding:"15px",
+
+border:"2px solid #9f7cd0",
+
+borderRadius:"15px",
+
+background:"white",
+
+color:"#8d5da8",
+
+fontWeight:"bold",
+
+marginTop:"12px",
+
+cursor:"pointer"
+
+}}
+
+>
+
+Ver detalle
 
 </button>
 
