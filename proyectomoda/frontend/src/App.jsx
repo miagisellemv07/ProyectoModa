@@ -10,46 +10,98 @@ import DetalleProducto from "./pages/DetalleProducto";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+import DashboardLayout from "./layouts/DashboardLayout";
+
+import AdminClientes from "./pages/dashboard/AdminClientes";
+import AdminTiendas from "./pages/dashboard/AdminTiendas";
+import AdminUsuarios from "./pages/dashboard/AdminUsuarios";
+
+import ClienteCompras from "./pages/dashboard/ClienteCompras";
+import ClientePagos from "./pages/dashboard/ClientePagos";
+
+import EmprendedorPedidos from "./pages/dashboard/EmprendedorPedidos";
+import EmprendedorPagos from "./pages/dashboard/EmprendedorPagos";
+import EmprendedorProductos
+from "./pages/dashboard/EmprendedorProductos";
+
 import "./styles/auth.css";
 
 function App() {
   return (
     <BrowserRouter>
 
-      <Navbar />
-
       <Routes>
 
         <Route
           path="/"
-          element={<Home />}
+          element={
+            <>
+              <Navbar />
+              <Home />
+              <Footer />
+            </>
+          }
         />
 
         <Route
           path="/productos"
-          element={<Productos />}
+          element={
+            <>
+              <Navbar />
+              <Productos />
+              <Footer />
+            </>
+          }
         />
 
         <Route
           path="/productos/:id"
-          element={<DetalleProducto />}
+          element={
+            <>
+              <Navbar />
+              <DetalleProducto />
+              <Footer />
+            </>
+          }
         />
-
-        {/* NUEVAS RUTAS */}
 
         <Route
           path="/login"
-          element={<Login />}
+          element={
+            <>
+              <Navbar />
+              <Login />
+              <Footer />
+            </>
+          }
         />
 
         <Route
           path="/register"
-          element={<Register />}
+          element={
+            <>
+              <Navbar />
+              <Register />
+              <Footer />
+            </>
+          }
         />
 
-      </Routes>
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="admin/clientes" element={<AdminClientes />} />
+          <Route path="admin/tiendas" element={<AdminTiendas />} />
+          <Route path="admin/usuarios" element={<AdminUsuarios />} />
 
-      <Footer />
+          <Route path="cliente/compras" element={<ClienteCompras />} />
+          <Route path="cliente/pagos" element={<ClientePagos />} />
+
+          <Route path="emprendedor/pedidos" element={<EmprendedorPedidos />} />
+          <Route path="emprendedor/pagos" element={<EmprendedorPagos />} />
+          <Route path="emprendedor/productos" element={<EmprendedorProductos />}
+/>
+        </Route>
+
+      </Routes>
 
     </BrowserRouter>
   );
