@@ -18,12 +18,8 @@ function DetalleProducto() {
 
   async function obtenerProducto() {
     try {
-      const respuesta = await fetch(
-        `http://127.0.0.1:8000/api/productos/${id}`
-      );
-
+      const respuesta = await fetch(`http://127.0.0.1:8000/api/productos/${id}`);
       const data = await respuesta.json();
-
       setProducto(data.data);
     } catch (error) {
       console.log(error);
@@ -34,12 +30,8 @@ function DetalleProducto() {
 
   async function obtenerResenas() {
     try {
-      const respuesta = await fetch(
-        `http://127.0.0.1:8000/api/productos/${id}/resenas`
-      );
-
+      const respuesta = await fetch(`http://127.0.0.1:8000/api/productos/${id}/resenas`);
       const data = await respuesta.json();
-
       setResenas(data);
     } catch (error) {
       console.log(error);
@@ -69,6 +61,16 @@ function DetalleProducto() {
     return "★".repeat(numero) + "☆".repeat(5 - numero);
   }
 
+  function obtenerNombreCliente(resena) {
+    const usuario = resena.cliente?.usuario;
+
+    if (usuario) {
+      return `${usuario.nombre || ""} ${usuario.apellido || ""}`.trim();
+    }
+
+    return "Cliente";
+  }
+
   function requiereLogin() {
     const token = localStorage.getItem("token");
 
@@ -88,26 +90,23 @@ function DetalleProducto() {
     if (!token) return;
 
     try {
-      const respuesta = await fetch(
-        "http://127.0.0.1:8000/api/resenas",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            producto_id: producto.id,
-            calificacion: calificacion,
-            comentario: comentario,
-          }),
-        }
-      );
+      const respuesta = await fetch("http://127.0.0.1:8000/api/resenas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          producto_id: Number(id),
+          calificacion: Number(calificacion),
+          comentario: comentario,
+        }),
+      });
 
       const data = await respuesta.json();
 
       if (!respuesta.ok) {
-        setMensaje("No se pudo publicar la reseña.");
+        setMensaje(data.message || data.error || "No se pudo publicar la reseña.");
         return;
       }
 
@@ -115,6 +114,7 @@ function DetalleProducto() {
       setComentario("");
       setCalificacion(5);
       obtenerResenas();
+
     } catch (error) {
       console.log(error);
       setMensaje("Error al conectar con el servidor.");
@@ -123,7 +123,6 @@ function DetalleProducto() {
 
   function agregarAlCarrito() {
     const token = requiereLogin();
-
     if (!token) return;
 
     alert("Producto agregado al carrito.");
@@ -131,7 +130,6 @@ function DetalleProducto() {
 
   function comprarAhora() {
     const token = requiereLogin();
-
     if (!token) return;
 
     alert("Compra iniciada.");
@@ -158,13 +156,7 @@ function DetalleProducto() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#f7f2fb",
-        padding: "50px",
-      }}
-    >
+    <div style={{ minHeight: "100vh", background: "#f7f2fb", padding: "50px" }}>
       <button
         onClick={regresar}
         style={{
@@ -218,33 +210,15 @@ function DetalleProducto() {
             {producto.tienda?.categoria || "Producto"}
           </span>
 
-          <h1
-            style={{
-              fontSize: "48px",
-              color: "#684b7c",
-              marginBottom: "20px",
-            }}
-          >
+          <h1 style={{ fontSize: "48px", color: "#684b7c", marginBottom: "20px" }}>
             {producto.nombre}
           </h1>
 
-          <h2
-            style={{
-              color: "#8d5da8",
-              fontSize: "38px",
-              marginBottom: "25px",
-            }}
-          >
+          <h2 style={{ color: "#8d5da8", fontSize: "38px", marginBottom: "25px" }}>
             ${producto.precio} MXN
           </h2>
 
-          <p
-            style={{
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "#555",
-            }}
-          >
+          <p style={{ fontSize: "18px", lineHeight: "1.7", color: "#555" }}>
             {producto.descripcion}
           </p>
 
@@ -259,8 +233,7 @@ function DetalleProducto() {
             <h4>Información del vendedor</h4>
 
             <p>
-              <b>Tienda:</b>{" "}
-              {producto.tienda?.nombre || "Sin tienda"}
+              <b>Tienda:</b> {producto.tienda?.nombre || "Sin tienda"}
             </p>
 
             <p>
@@ -285,14 +258,7 @@ function DetalleProducto() {
             </p>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "15px",
-              flexWrap: "wrap",
-              marginTop: "30px",
-            }}
-          >
+          <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginTop: "30px" }}>
             <button
               onClick={agregarAlCarrito}
               style={{
@@ -300,8 +266,7 @@ function DetalleProducto() {
                 padding: "16px",
                 border: "none",
                 borderRadius: "18px",
-                background:
-                  "linear-gradient(90deg,#e6a5c8,#9f7cd0)",
+                background: "linear-gradient(90deg,#e6a5c8,#9f7cd0)",
                 color: "white",
                 fontWeight: "bold",
                 cursor: "pointer",
@@ -338,13 +303,10 @@ function DetalleProducto() {
           boxShadow: "0 15px 35px rgba(0,0,0,.08)",
         }}
       >
-        <h2 style={{ color: "#684b7c" }}>
-          Reseñas y recompensas
-        </h2>
+        <h2 style={{ color: "#684b7c" }}>Reseñas y recompensas</h2>
 
         <p>
-          Comparte tu experiencia con este producto y gana{" "}
-          <b>+10 puntos</b> por participar.
+          Comparte tu experiencia con este producto y gana <b>+10 puntos</b> por participar.
         </p>
 
         {mensaje && (
@@ -413,8 +375,7 @@ function DetalleProducto() {
               padding: "15px 25px",
               border: "none",
               borderRadius: "18px",
-              background:
-                "linear-gradient(90deg,#e6a5c8,#9f7cd0)",
+              background: "linear-gradient(90deg,#e6a5c8,#9f7cd0)",
               color: "white",
               fontWeight: "bold",
               cursor: "pointer",
@@ -426,14 +387,10 @@ function DetalleProducto() {
 
         <hr style={{ margin: "35px 0" }} />
 
-        <h3 style={{ color: "#684b7c" }}>
-          Opiniones de clientes
-        </h3>
+        <h3 style={{ color: "#684b7c" }}>Opiniones de clientes</h3>
 
         {resenas.length === 0 && (
-          <p>
-            Todavía no hay reseñas. Sé el primero en opinar y ganar puntos.
-          </p>
+          <p>Todavía no hay reseñas. Sé el primero en opinar y ganar puntos.</p>
         )}
 
         {resenas.map((resena) => (
@@ -450,15 +407,10 @@ function DetalleProducto() {
               {estrellas(Number(resena.calificacion))}
             </div>
 
-            <p style={{ marginTop: "10px" }}>
-              {resena.comentario}
-            </p>
+            <p style={{ marginTop: "10px" }}>{resena.comentario}</p>
 
             <small>
-              Cliente:{" "}
-              {resena.cliente?.usuario_id?.nombre ||
-                "Cliente"}{" "}
-              · +{resena.puntos_ganados} puntos
+              Cliente: {obtenerNombreCliente(resena)} · +{resena.puntos_ganados} puntos
             </small>
           </div>
         ))}

@@ -11,9 +11,9 @@ class cliente extends Model
         'direccion'
     ];
 
-    public function usuario_id()
+    public function usuario()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     public function resenas()
