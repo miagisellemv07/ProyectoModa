@@ -10,6 +10,7 @@ function DetalleProducto() {
   const [calificacion, setCalificacion] = useState(5);
   const [comentario, setComentario] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [cantidad, setCantidad] = useState(1);
 
   useEffect(() => {
     obtenerProducto();
@@ -82,6 +83,20 @@ function DetalleProducto() {
     return token;
   }
 
+  function cambiarCantidad(valor) {
+    let nuevaCantidad = Number(valor);
+
+    if (!nuevaCantidad || nuevaCantidad < 1) {
+      nuevaCantidad = 1;
+    }
+
+    if (producto && nuevaCantidad > producto.stock) {
+      nuevaCantidad = producto.stock;
+    }
+
+    setCantidad(nuevaCantidad);
+  }
+
   async function publicarResena(e) {
     e.preventDefault();
 
@@ -114,25 +129,57 @@ function DetalleProducto() {
       setComentario("");
       setCalificacion(5);
       obtenerResenas();
-
     } catch (error) {
       console.log(error);
       setMensaje("Error al conectar con el servidor.");
     }
   }
 
-  function agregarAlCarrito() {
+  async function agregarAlCarrito() {
     const token = requiereLogin();
+
     if (!token) return;
 
-    alert("Producto agregado al carrito.");
+    try {
+      const respuesta = await fetch("http://127.0.0.1:8000/api/carritos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          producto_id: Number(id),
+          cantidad: Number(cantidad),
+        }),
+      });
+
+      const data = await respuesta.json();
+
+      if (!respuesta.ok) {
+        if (respuesta.status === 401 || data.error === "Unauthorized") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
+          return;
+        }
+
+        setMensaje(data.message || data.error || "No se pudo agregar al carrito.");
+        return;
+      }
+
+      window.location.href = "/carrito";
+    } catch (error) {
+      console.log(error);
+      setMensaje("Error al conectar con el carrito. Si tu sesión expiró, inicia sesión otra vez.");
+    }
   }
 
   function comprarAhora() {
     const token = requiereLogin();
+
     if (!token) return;
 
-    alert("Compra iniciada.");
+    agregarAlCarrito();
   }
 
   function regresar() {
@@ -257,6 +304,86 @@ function DetalleProducto() {
               <b>{promedioResenas()}</b> / 5 ({resenas.length} reseñas)
             </p>
           </div>
+
+          <div style={{ marginTop: "30px" }}>
+            <p>
+              <b>Cantidad:</b>
+            </p>
+
+            <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+              <button
+                type="button"
+                onClick={() => cambiarCantidad(cantidad - 1)}
+                style={{
+                  width: "45px",
+                  height: "45px",
+                  border: "none",
+                  borderRadius: "12px",
+                  background: "#efe4f7",
+                  color: "#684b7c",
+                  fontSize: "22px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                -
+              </button>
+
+              <input
+                type="number"
+                min="1"
+                max={producto.stock}
+                value={cantidad}
+                onChange={(e) => cambiarCantidad(e.target.value)}
+                style={{
+                  width: "90px",
+                  height: "45px",
+                  textAlign: "center",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  borderRadius: "12px",
+                  border: "1px solid #ddd",
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={() => cambiarCantidad(cantidad + 1)}
+                style={{
+                  width: "45px",
+                  height: "45px",
+                  border: "none",
+                  borderRadius: "12px",
+                  background: "#efe4f7",
+                  color: "#684b7c",
+                  fontSize: "22px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                +
+              </button>
+            </div>
+
+            <h3 style={{ marginTop: "20px", color: "#8d5da8" }}>
+              Subtotal: ${(Number(producto.precio) * cantidad).toFixed(2)} MXN
+            </h3>
+          </div>
+
+          {mensaje && (
+            <div
+              style={{
+                background: "#efe4f7",
+                color: "#684b7c",
+                padding: "15px",
+                borderRadius: "15px",
+                marginTop: "20px",
+                fontWeight: "bold",
+              }}
+            >
+              {mensaje}
+            </div>
+          )}
 
           <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginTop: "30px" }}>
             <button

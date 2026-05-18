@@ -5,12 +5,29 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\carrito;
+use App\Models\cliente;
+use App\Models\producto;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CarritoController extends Controller
 {
+    private function clienteAutenticado()
+    {
+        $usuario = JWTAuth::parseToken()->authenticate();
+
+        return cliente::firstOrCreate(
+            ['usuario_id' => $usuario->id],
+            ['direccion' => 'Sin dirección']
+        );
+    }
+
     public function index()
     {
-        $carrito = carrito::with(['cliente', 'producto'])->get();
+        $cliente = $this->clienteAutenticado();
+
+        $carrito = carrito::with(['producto.tienda'])
+            ->where('cliente_id', $cliente->id)
+            ->get();
 
         return response()->json([
             "data" => $carrito,
@@ -20,71 +37,72 @@ class CarritoController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'cliente_id' => 'required|exists:clientes,id',
+        $cliente = $this->clienteAutenticado();
+
+        $request->validate([
             'producto_id' => 'required|exists:productos,id',
-            'cantidad' => 'required|numeric',
-            'precio_unitario' => 'required|numeric',
-            'subtotal' => 'required|numeric'
+            'cantidad' => 'required|integer|min:1'
         ]);
 
-        $carrito = new carrito();
-        $carrito->cliente_id = $request->cliente_id;
-        $carrito->producto_id = $request->producto_id;
-        $carrito->cantidad = $request->cantidad;
-        $carrito->precio_unitario = $request->precio_unitario;
-        $carrito->subtotal = $request->subtotal;
+        $producto = producto::findOrFail($request->producto_id);
 
-        $carrito->save();
+        $item = carrito::where('cliente_id', $cliente->id)
+            ->where('producto_id', $producto->id)
+            ->first();
+
+        if ($item) {
+            $item->cantidad += $request->cantidad;
+            $item->subtotal = $item->cantidad * $item->precio_unitario;
+            $item->save();
+        } else {
+            $item = carrito::create([
+                'cliente_id' => $cliente->id,
+                'producto_id' => $producto->id,
+                'cantidad' => $request->cantidad,
+                'precio_unitario' => $producto->precio,
+                'subtotal' => $producto->precio * $request->cantidad
+            ]);
+        }
 
         return response()->json([
-            "data" => $carrito,
-            "status" => "success"
+            "data" => $item,
+            "status" => "success",
+            "message" => "Producto agregado al carrito"
         ], 201);
-    }
-
-    public function show(string $id)
-    {
-        $carrito = carrito::with(['cliente', 'producto'])->find($id);
-
-        return response()->json([
-            "data" => $carrito,
-            "status" => "success"
-        ], 200);
     }
 
     public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
-            'cliente_id' => 'required|exists:clientes,id',
-            'producto_id' => 'required|exists:productos,id',
-            'cantidad' => 'required|numeric',
-            'precio_unitario' => 'required|numeric',
-            'subtotal' => 'required|numeric'
+        $cliente = $this->clienteAutenticado();
+
+        $request->validate([
+            'cantidad' => 'required|integer|min:1'
         ]);
 
-        $carrito = carrito::find($id);
-        $carrito->cliente_id = $request->cliente_id;
-        $carrito->producto_id = $request->producto_id;
-        $carrito->cantidad = $request->cantidad;
-        $carrito->precio_unitario = $request->precio_unitario;
-        $carrito->subtotal = $request->subtotal;
+        $item = carrito::where('cliente_id', $cliente->id)
+            ->findOrFail($id);
 
-        $carrito->save();
+        $item->cantidad = $request->cantidad;
+        $item->subtotal = $item->cantidad * $item->precio_unitario;
+        $item->save();
 
         return response()->json([
-            "data" => $carrito,
+            "data" => $item,
             "status" => "success"
         ], 200);
     }
 
     public function destroy(string $id)
     {
-        $carrito = carrito::find($id);
-        $carrito->delete();
+        $cliente = $this->clienteAutenticado();
+
+        $item = carrito::where('cliente_id', $cliente->id)
+            ->findOrFail($id);
+
+        $item->delete();
 
         return response()->json([
-            "message" => "Eliminado correctamente"
+            "message" => "Producto eliminado del carrito"
         ], 200);
     }
 }

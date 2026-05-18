@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\CarritoController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ResenaController;
+use App\Http\Controllers\Api\PayPallController;
 
 Route::resource('/carritos', CarritoController::class);
 Route::resource('/clientes', ClienteController::class);
@@ -38,9 +39,17 @@ Route::post('/login', [AuthController::class, 'login']);
 
 /*
 |--------------------------------------------------------------------------
+| PayPal
+|--------------------------------------------------------------------------
+*/
+Route::get('/paypal/{amount}', [PayPallController::class, 'index']);
+Route::post('/paypal/create-order', [PayPallController::class, 'createOrder']);
+Route::post('/paypal/capture-order', [PayPallController::class, 'captureOrder']);
+
+/*
+|--------------------------------------------------------------------------
 | Reseñas públicas
 |--------------------------------------------------------------------------
-| Cualquier usuario puede ver las reseñas de un producto.
 */
 Route::get('/productos/{id}/resenas', [ResenaController::class, 'index']);
 
@@ -50,11 +59,5 @@ Route::middleware('jwt')->group(function () {
     Route::put('/user', [AuthController::class, 'updateUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Reseñas protegidas
-    |--------------------------------------------------------------------------
-    | Solo usuarios autenticados pueden crear reseñas.
-    */
     Route::post('/resenas', [ResenaController::class, 'store']);
 });

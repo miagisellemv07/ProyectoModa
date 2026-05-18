@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Productos from "./pages/Productos";
 import DetalleProducto from "./pages/DetalleProducto";
+import Carrito from "./pages/Carrito";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -59,6 +60,17 @@ function App() {
             <>
               <Navbar />
               <DetalleProducto />
+              <Footer />
+            </>
+          }
+        />
+
+        <Route
+          path="/carrito"
+          element={
+            <>
+              <Navbar />
+              <Carrito />
               <Footer />
             </>
           }
