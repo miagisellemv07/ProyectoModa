@@ -46,12 +46,28 @@ class CarritoController extends Controller
 
         $producto = producto::findOrFail($request->producto_id);
 
+        if ($request->cantidad > $producto->stock) {
+            return response()->json([
+                "message" => "No hay suficiente stock disponible",
+                "status" => "error"
+            ], 422);
+        }
+
         $item = carrito::where('cliente_id', $cliente->id)
             ->where('producto_id', $producto->id)
             ->first();
 
         if ($item) {
-            $item->cantidad += $request->cantidad;
+            $nuevaCantidad = $item->cantidad + $request->cantidad;
+
+            if ($nuevaCantidad > $producto->stock) {
+                return response()->json([
+                    "message" => "No puedes agregar más piezas que el stock disponible",
+                    "status" => "error"
+                ], 422);
+            }
+
+            $item->cantidad = $nuevaCantidad;
             $item->subtotal = $item->cantidad * $item->precio_unitario;
             $item->save();
         } else {
@@ -79,8 +95,16 @@ class CarritoController extends Controller
             'cantidad' => 'required|integer|min:1'
         ]);
 
-        $item = carrito::where('cliente_id', $cliente->id)
+        $item = carrito::with('producto')
+            ->where('cliente_id', $cliente->id)
             ->findOrFail($id);
+
+        if ($request->cantidad > $item->producto->stock) {
+            return response()->json([
+                "message" => "No puedes superar el stock disponible",
+                "status" => "error"
+            ], 422);
+        }
 
         $item->cantidad = $request->cantidad;
         $item->subtotal = $item->cantidad * $item->precio_unitario;

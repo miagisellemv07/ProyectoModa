@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 function Carrito() {
   const [items, setItems] = useState([]);
   const [mensaje, setMensaje] = useState("");
   const [mostrarCheckout, setMostrarCheckout] = useState(false);
+  const [paypalOptions, setPaypalOptions] = useState(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -11,8 +13,20 @@ function Carrito() {
     obtenerCarrito();
   }, []);
 
+  useEffect(() => {
+    if (mostrarCheckout && total() > 0) {
+      obtenerConfigPaypal();
+    }
+  }, [mostrarCheckout, items]);
+
   function token() {
     return localStorage.getItem("token");
+  }
+
+  function cerrarSesionExpirada() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
   }
 
   async function obtenerCarrito() {
@@ -27,9 +41,7 @@ function Carrito() {
 
       if (!respuesta.ok) {
         if (respuesta.status === 401) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          window.location.href = "/login";
+          cerrarSesionExpirada();
           return;
         }
 
@@ -44,12 +56,44 @@ function Carrito() {
     }
   }
 
+  async function obtenerConfigPaypal() {
+    try {
+      const respuesta = await fetch(
+        `http://127.0.0.1:8000/api/paypal/${total().toFixed(2)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token()}`,
+          },
+        }
+      );
+
+      const data = await respuesta.json();
+
+      if (!respuesta.ok) {
+        if (respuesta.status === 401) {
+          cerrarSesionExpirada();
+          return;
+        }
+
+        setMensaje(data.message || data.error || "No se pudo cargar PayPal.");
+        return;
+      }
+
+      setPaypalOptions({
+        "client-id": data.client_id,
+        currency: data.currency || "MXN",
+        intent: "capture",
+      });
+    } catch (error) {
+      console.log(error);
+      setMensaje("No se pudo cargar PayPal.");
+    }
+  }
+
   async function cambiarCantidad(item, cantidad) {
     let nuevaCantidad = Number(cantidad);
 
-    if (!nuevaCantidad || nuevaCantidad < 1) {
-      nuevaCantidad = 1;
-    }
+    if (!nuevaCantidad || nuevaCantidad < 1) nuevaCantidad = 1;
 
     if (item.producto?.stock && nuevaCantidad > item.producto.stock) {
       nuevaCantidad = item.producto.stock;
@@ -82,9 +126,7 @@ function Carrito() {
         }
       );
 
-      if (!respuesta.ok) {
-        obtenerCarrito();
-      }
+      if (!respuesta.ok) obtenerCarrito();
     } catch (error) {
       console.log(error);
       obtenerCarrito();
@@ -93,12 +135,22 @@ function Carrito() {
 
   async function eliminarItem(id) {
     try {
-      await fetch(`http://127.0.0.1:8000/api/carritos/${id}`, {
+      const respuesta = await fetch(`http://127.0.0.1:8000/api/carritos/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token()}`,
         },
       });
+
+      if (!respuesta.ok) {
+        if (respuesta.status === 401) {
+          cerrarSesionExpirada();
+          return;
+        }
+
+        setMensaje("Error al eliminar producto.");
+        return;
+      }
 
       setItems(items.filter((item) => item.id !== id));
     } catch (error) {
@@ -119,12 +171,26 @@ function Carrito() {
     return subtotal() + impuestos();
   }
 
-  function obtenerImagen(item) {
-    if (item.producto?.imagen) {
-      return `http://127.0.0.1:8000/storage/${item.producto.imagen}`;
+  function obtenerImagenProducto(producto) {
+    if (!producto?.imagen) {
+      return "https://via.placeholder.com/400x300";
     }
 
-    return "https://via.placeholder.com/120";
+    const imagen = producto.imagen.replace(/^\/+/, "");
+
+    if (imagen.startsWith("http")) {
+      return imagen;
+    }
+
+    if (imagen.startsWith("storage/")) {
+      return `http://127.0.0.1:8000/${imagen}`;
+    }
+
+    return `http://127.0.0.1:8000/storage/${imagen}`;
+  }
+
+  function obtenerImagen(item) {
+    return obtenerImagenProducto(item.producto);
   }
 
   function finalizarCompra() {
@@ -141,25 +207,14 @@ function Carrito() {
     }, 100);
   }
 
-  function pagarPaypalDemo() {
-    setMensaje("PayPal todavía no está conectado. Ese será el siguiente paso.");
+  async function vaciarCarritoVisual() {
+    setItems([]);
+    setMostrarCheckout(false);
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#f7f2fb",
-        padding: "50px",
-      }}
-    >
-      <h1
-        style={{
-          color: "#684b7c",
-          marginBottom: "30px",
-          fontSize: "42px",
-        }}
-      >
+    <div style={{ minHeight: "100vh", background: "#f7f2fb", padding: "50px" }}>
+      <h1 style={{ color: "#684b7c", marginBottom: "30px", fontSize: "42px" }}>
         Carrito de compra
       </h1>
 
@@ -179,13 +234,7 @@ function Carrito() {
       )}
 
       {items.length === 0 && (
-        <div
-          style={{
-            background: "white",
-            padding: "30px",
-            borderRadius: "25px",
-          }}
-        >
+        <div style={{ background: "white", padding: "30px", borderRadius: "25px" }}>
           Tu carrito está vacío.
         </div>
       )}
@@ -217,27 +266,13 @@ function Carrito() {
           />
 
           <div>
-            <h3
-              style={{
-                marginBottom: "8px",
-                color: "#3f3151",
-                fontSize: "28px",
-              }}
-            >
+            <h3 style={{ marginBottom: "8px", color: "#3f3151", fontSize: "28px" }}>
               {item.producto?.nombre}
             </h3>
 
-            <p>
-              Precio unitario: ${Number(item.precio_unitario).toFixed(2)} MXN
-            </p>
+            <p>Precio unitario: ${Number(item.precio_unitario).toFixed(2)} MXN</p>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <button
                 type="button"
                 onClick={() => cambiarCantidad(item, item.cantidad - 1)}
@@ -300,13 +335,7 @@ function Carrito() {
           <div style={{ textAlign: "right" }}>
             <p style={{ marginBottom: "5px", color: "#777" }}>Subtotal</p>
 
-            <h3
-              style={{
-                color: "#8d5da8",
-                fontSize: "30px",
-                marginBottom: "20px",
-              }}
-            >
+            <h3 style={{ color: "#8d5da8", fontSize: "30px", marginBottom: "20px" }}>
               ${Number(item.subtotal).toFixed(2)}
             </h3>
 
@@ -339,13 +368,7 @@ function Carrito() {
             boxShadow: "0 10px 25px rgba(0,0,0,.08)",
           }}
         >
-          <h2
-            style={{
-              color: "#3f3151",
-              fontSize: "34px",
-              marginBottom: "20px",
-            }}
-          >
+          <h2 style={{ color: "#3f3151", fontSize: "34px", marginBottom: "20px" }}>
             Total: ${total().toFixed(2)} MXN
           </h2>
 
@@ -378,13 +401,7 @@ function Carrito() {
             boxShadow: "0 15px 35px rgba(0,0,0,.08)",
           }}
         >
-          <h1
-            style={{
-              color: "#3f3151",
-              fontSize: "42px",
-              marginBottom: "40px",
-            }}
-          >
+          <h1 style={{ color: "#3f3151", fontSize: "42px", marginBottom: "40px" }}>
             Finalizar pedido
           </h1>
 
@@ -409,16 +426,12 @@ function Carrito() {
                 }}
               >
                 <div>
-                  <small style={{ fontWeight: "bold", color: "#777" }}>
-                    NOMBRE
-                  </small>
+                  <small style={{ fontWeight: "bold", color: "#777" }}>NOMBRE</small>
                   <p style={{ fontSize: "18px" }}>{user?.nombre || "Cliente"}</p>
                 </div>
 
                 <div>
-                  <small style={{ fontWeight: "bold", color: "#777" }}>
-                    APELLIDO
-                  </small>
+                  <small style={{ fontWeight: "bold", color: "#777" }}>APELLIDO</small>
                   <p style={{ fontSize: "18px" }}>{user?.apellido || ""}</p>
                 </div>
               </div>
@@ -431,9 +444,7 @@ function Carrito() {
               </div>
 
               <div style={{ marginBottom: "40px" }}>
-                <small style={{ fontWeight: "bold", color: "#777" }}>
-                  TELÉFONO
-                </small>
+                <small style={{ fontWeight: "bold", color: "#777" }}>TELÉFONO</small>
                 <p style={{ fontSize: "18px" }}>{user?.tel || "Sin teléfono"}</p>
               </div>
 
@@ -446,47 +457,124 @@ function Carrito() {
                   border: "2px solid #efe4f7",
                   borderRadius: "25px",
                   padding: "30px",
-                  textAlign: "center",
-                  maxWidth: "360px",
+                  maxWidth: "430px",
                 }}
               >
-                <i
-                  className="bi bi-paypal"
-                  style={{
-                    fontSize: "70px",
-                    color: "#0070ba",
-                  }}
-                ></i>
-
-                <h3 style={{ marginTop: "15px", color: "#3f3151" }}>
+                <h3 style={{ color: "#3f3151", marginBottom: "10px" }}>
                   Pagar con PayPal
                 </h3>
 
-                <button
-                  onClick={pagarPaypalDemo}
-                  style={{
-                    marginTop: "20px",
-                    padding: "14px 25px",
-                    border: "none",
-                    borderRadius: "16px",
-                    background: "#0070ba",
-                    color: "white",
-                    fontWeight: "bold",
-                    cursor: "pointer",
-                  }}
-                >
-                  Continuar con PayPal
-                </button>
-
-                <p
-                  style={{
-                    marginTop: "15px",
-                    color: "#777",
-                    fontSize: "14px",
-                  }}
-                >
-                  PayPal todavía no está conectado. Este botón es visual por ahora.
+                <p style={{ color: "#777", fontSize: "14px", marginBottom: "20px" }}>
+                  Puedes pagar de forma segura usando PayPal, tarjeta de crédito o débito.
                 </p>
+
+                {paypalOptions ? (
+                  <PayPalScriptProvider options={paypalOptions}>
+                    <PayPalButtons
+                      style={{
+                        layout: "vertical",
+                        shape: "pill",
+                        color: "gold",
+                        label: "paypal",
+                      }}
+                      createOrder={async () => {
+                        const respuesta = await fetch(
+                          "http://127.0.0.1:8000/api/paypal/create-order",
+                          {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization: `Bearer ${token()}`,
+                            },
+                            body: JSON.stringify({
+                              amount: total().toFixed(2),
+                            }),
+                          }
+                        );
+
+                        const data = await respuesta.json();
+
+                        if (!respuesta.ok || !data.id) {
+                          if (respuesta.status === 401) {
+                            cerrarSesionExpirada();
+                            return;
+                          }
+
+                          setMensaje("No se pudo crear la orden de PayPal.");
+                          throw new Error("No se pudo crear la orden de PayPal.");
+                        }
+
+                        return data.id;
+                      }}
+                      onApprove={async (data) => {
+                        const respuesta = await fetch(
+                          "http://127.0.0.1:8000/api/paypal/capture-order",
+                          {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization: `Bearer ${token()}`,
+                            },
+                            body: JSON.stringify({
+                              orderID: data.orderID,
+                            }),
+                          }
+                        );
+
+                        const resultado = await respuesta.json();
+
+                        if (!respuesta.ok) {
+                          if (respuesta.status === 401) {
+                            cerrarSesionExpirada();
+                            return;
+                          }
+
+                          setMensaje("No se pudo capturar el pago.");
+                          return;
+                        }
+
+                        if (resultado.status === "COMPLETED") {
+                          const guardarCompra = await fetch(
+                            "http://127.0.0.1:8000/api/finalizar-compra",
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${token()}`,
+                              },
+                              body: JSON.stringify({
+                                paypal_order_id: data.orderID,
+                                paypal_status: resultado.status,
+                                total: total().toFixed(2),
+                              }),
+                            }
+                          );
+
+                          const compra = await guardarCompra.json();
+
+                          if (!guardarCompra.ok) {
+                            setMensaje(
+                              compra.message ||
+                                "El pago pasó, pero no se pudo guardar la compra."
+                            );
+                            return;
+                          }
+
+                          setMensaje("Compra finalizada correctamente ✔");
+                          await vaciarCarritoVisual();
+                        } else {
+                          setMensaje("El pago no se completó correctamente.");
+                        }
+                      }}
+                      onError={(error) => {
+                        console.log(error);
+                        setMensaje("Error con PayPal.");
+                      }}
+                    />
+                  </PayPalScriptProvider>
+                ) : (
+                  <p>Cargando PayPal...</p>
+                )}
               </div>
             </div>
 
@@ -558,7 +646,7 @@ function Carrito() {
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <p>Impuestos estimados</p>
+                <p>IVA (16%)</p>
                 <p>${impuestos().toFixed(2)} MXN</p>
               </div>
 
@@ -580,13 +668,7 @@ function Carrito() {
                 <h2 style={{ color: "#8d5da8" }}>${total().toFixed(2)} MXN</h2>
               </div>
 
-              <p
-                style={{
-                  marginTop: "20px",
-                  color: "#777",
-                  fontSize: "14px",
-                }}
-              >
+              <p style={{ marginTop: "20px", color: "#777", fontSize: "14px" }}>
                 Tus productos serán procesados después de confirmar el pago.
               </p>
             </div>

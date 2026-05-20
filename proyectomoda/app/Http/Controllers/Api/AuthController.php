@@ -8,6 +8,7 @@ use App\Models\cliente;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Http\Controllers\Controller;
@@ -42,6 +43,18 @@ class AuthController extends Controller
 
             return $usuario;
         });
+
+        try {
+            Mail::raw(
+                "Hola {$user->nombre}, gracias por registrarte en Virtuality Mall.\n\nTu cuenta fue creada correctamente y ya puedes explorar productos, agregar artículos al carrito y realizar compras.\n\nGracias por formar parte de Virtuality Mall.",
+                function ($message) use ($user) {
+                    $message->to($user->email)
+                        ->subject('Bienvenida a Virtuality Mall');
+                }
+            );
+        } catch (\Exception $e) {
+            // Si falla el correo, no se rompe el registro.
+        }
 
         try {
             $token = JWTAuth::fromUser($user);
