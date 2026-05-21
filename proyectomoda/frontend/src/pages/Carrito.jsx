@@ -31,7 +31,7 @@ function Carrito() {
 
   async function obtenerCarrito() {
     try {
-      const respuesta = await fetch("http://127.0.0.1:8000/api/carritos", {
+      const respuesta = await fetch("/api/carritos", {
         headers: {
           Authorization: `Bearer ${token()}`,
         },
@@ -59,7 +59,7 @@ function Carrito() {
   async function obtenerConfigPaypal() {
     try {
       const respuesta = await fetch(
-        `http://127.0.0.1:8000/api/paypal/${total().toFixed(2)}`,
+        `/api/paypal/${total().toFixed(2)}`,
         {
           headers: {
             Authorization: `Bearer ${token()}`,
@@ -113,7 +113,7 @@ function Carrito() {
 
     try {
       const respuesta = await fetch(
-        `http://127.0.0.1:8000/api/carritos/${item.id}`,
+        `/api/carritos/${item.id}`,
         {
           method: "PUT",
           headers: {
@@ -135,7 +135,7 @@ function Carrito() {
 
   async function eliminarItem(id) {
     try {
-      const respuesta = await fetch(`http://127.0.0.1:8000/api/carritos/${id}`, {
+      const respuesta = await fetch(`/api/carritos/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token()}`,
@@ -183,10 +183,10 @@ function Carrito() {
     }
 
     if (imagen.startsWith("storage/")) {
-      return `http://127.0.0.1:8000/${imagen}`;
+      return `/${imagen}`;
     }
 
-    return `http://127.0.0.1:8000/storage/${imagen}`;
+    return `/storage/${imagen}`;
   }
 
   function obtenerImagen(item) {
@@ -479,7 +479,7 @@ function Carrito() {
                       }}
                       createOrder={async () => {
                         const respuesta = await fetch(
-                          "http://127.0.0.1:8000/api/paypal/create-order",
+                          "/api/paypal/create-order",
                           {
                             method: "POST",
                             headers: {
@@ -508,7 +508,7 @@ function Carrito() {
                       }}
                       onApprove={async (data) => {
                         const respuesta = await fetch(
-                          "http://127.0.0.1:8000/api/paypal/capture-order",
+                          "/api/paypal/capture-order",
                           {
                             method: "POST",
                             headers: {
@@ -535,7 +535,7 @@ function Carrito() {
 
                         if (resultado.status === "COMPLETED") {
                           const guardarCompra = await fetch(
-                            "http://127.0.0.1:8000/api/finalizar-compra",
+                            "/api/finalizar-compra",
                             {
                               method: "POST",
                               headers: {

@@ -4,7 +4,7 @@ function Home() {
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/productos")
+    fetch("/api/productos")
       .then((res) => res.json())
       .then((data) => {
         setProductos((data.data || []).slice(0, 3));
@@ -28,7 +28,7 @@ function Home() {
       return producto.imagen;
     }
 
-    return `http://127.0.0.1:8000/storage/${producto.imagen}`;
+    return `/storage/${producto.imagen}`;
   }
 
   return (

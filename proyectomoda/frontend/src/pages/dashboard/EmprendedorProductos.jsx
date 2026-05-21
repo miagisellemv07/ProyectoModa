@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-const API_PRODUCTOS = "http://127.0.0.1:8000/api/productos";
-const API_TIENDAS = "http://127.0.0.1:8000/api/tiendas";
-const STORAGE_URL = "http://127.0.0.1:8000/storage/";
+const API_PRODUCTOS = "/api/productos";
+const API_TIENDAS = "/api/tiendas";
+const STORAGE_URL = "/storage/";
 
 function EmprendedorProductos() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -74,7 +74,7 @@ function EmprendedorProductos() {
     }
 
     if (producto.imagen.startsWith("storage/")) {
-      return `http://127.0.0.1:8000/${producto.imagen}`;
+      return `/${producto.imagen}`;
     }
 
     return `${STORAGE_URL}${producto.imagen}`;

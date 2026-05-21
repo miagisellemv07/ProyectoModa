@@ -23,6 +23,6 @@ class LoginController extends Controller
 
     protected function loggedOut(Request $request)
     {
-        return redirect()->away('http://localhost:5173');
+        return redirect()->away(env('APP_URL'));
     }
 }

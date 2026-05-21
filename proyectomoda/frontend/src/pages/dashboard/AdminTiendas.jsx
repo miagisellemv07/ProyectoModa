@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-const API_TIENDAS = "http://127.0.0.1:8000/api/tiendas";
-const API_EMPRENDEDORES = "http://127.0.0.1:8000/api/emprendedores";
+const API_TIENDAS = "/api/tiendas";
+const API_EMPRENDEDORES = "/api/emprendedores";
 
 function AdminTiendas() {
   const [tiendas, setTiendas] = useState([]);

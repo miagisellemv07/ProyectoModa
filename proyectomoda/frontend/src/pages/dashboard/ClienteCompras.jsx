@@ -10,7 +10,7 @@ function ClienteCompras() {
   async function obtener() {
     const token = localStorage.getItem("token");
 
-    const r = await fetch("http://127.0.0.1:8000/api/cliente/compras", {
+    const r = await fetch("/api/cliente/compras", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -26,9 +26,9 @@ function ClienteCompras() {
     const imagen = producto.imagen.replace(/^\/+/, "");
 
     if (imagen.startsWith("http")) return imagen;
-    if (imagen.startsWith("storage/")) return `http://127.0.0.1:8000/${imagen}`;
+    if (imagen.startsWith("storage/")) return `/${imagen}`;
 
-    return `http://127.0.0.1:8000/storage/${imagen}`;
+    return `/storage/${imagen}`;
   }
 
   return (

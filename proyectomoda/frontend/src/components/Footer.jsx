@@ -28,7 +28,7 @@ function Footer() {
                 <a href="#categorias">Categorías</a>
               </li>
               <li className="mb-2">
-                <a href="http://127.0.0.1:8000/dashboard">Dashboard</a>
+                <a href="/#/dashboard/cliente">Dashboard</a>
               </li>
             </ul>
           </div>

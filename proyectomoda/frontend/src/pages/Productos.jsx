@@ -12,7 +12,7 @@ function Productos() {
 
   async function obtenerProductos() {
     try {
-      const respuesta = await fetch("http://127.0.0.1:8000/api/productos");
+      const respuesta = await fetch("/api/productos");
       const data = await respuesta.json();
 
       setProductos(data.data);
@@ -35,10 +35,10 @@ function Productos() {
     }
 
     if (imagen.startsWith("storage/")) {
-      return `http://127.0.0.1:8000/${imagen}`;
+      return `/${imagen}`;
     }
 
-    return `http://127.0.0.1:8000/storage/${imagen}`;
+    return `/storage/${imagen}`;
   }
 
   function verDetalle(producto) {
@@ -62,7 +62,7 @@ function Productos() {
     if (!token) return;
 
     try {
-      const respuesta = await fetch("http://127.0.0.1:8000/api/carritos", {
+      const respuesta = await fetch("/api/carritos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

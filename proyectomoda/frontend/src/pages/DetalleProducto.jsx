@@ -19,7 +19,7 @@ function DetalleProducto() {
 
   async function obtenerProducto() {
     try {
-      const respuesta = await fetch(`http://127.0.0.1:8000/api/productos/${id}`);
+      const respuesta = await fetch(`/api/productos/${id}`);
       const data = await respuesta.json();
       setProducto(data.data);
     } catch (error) {
@@ -31,7 +31,7 @@ function DetalleProducto() {
 
   async function obtenerResenas() {
     try {
-      const respuesta = await fetch(`http://127.0.0.1:8000/api/productos/${id}/resenas`);
+      const respuesta = await fetch(`/api/productos/${id}/resenas`);
       const data = await respuesta.json();
       setResenas(data);
     } catch (error) {
@@ -41,7 +41,7 @@ function DetalleProducto() {
 
   function obtenerImagen(producto) {
     if (producto.imagen) {
-      return `http://127.0.0.1:8000/storage/${producto.imagen}`;
+      return `/storage/${producto.imagen}`;
     }
 
     return "https://via.placeholder.com/600x500";
@@ -105,7 +105,7 @@ function DetalleProducto() {
     if (!token) return;
 
     try {
-      const respuesta = await fetch("http://127.0.0.1:8000/api/resenas", {
+      const respuesta = await fetch("/api/resenas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -141,7 +141,7 @@ function DetalleProducto() {
     if (!token) return;
 
     try {
-      const respuesta = await fetch("http://127.0.0.1:8000/api/carritos", {
+      const respuesta = await fetch("/api/carritos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -69,7 +69,7 @@
 
     <hr class="mx-4 opacity-25">
 
-   <a href="http://localhost:5173" class="nav-link">
+   <a href="https://virtualitymall.alwaysdata.net/#/" class="nav-link">
     <i class="fas fa-external-link-alt"></i> Ver sitio web
 </a>
 

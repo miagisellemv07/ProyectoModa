@@ -10,7 +10,7 @@ function ClientePagos() {
   async function obtener() {
     const token = localStorage.getItem("token");
 
-    const r = await fetch("http://127.0.0.1:8000/api/cliente/pagos", {
+    const r = await fetch("/api/cliente/pagos", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

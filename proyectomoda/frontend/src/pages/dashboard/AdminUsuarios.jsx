@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API_USUARIOS = "http://127.0.0.1:8000/api/users";
+const API_USUARIOS = "/api/users";
 
 function AdminUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
