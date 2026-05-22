@@ -11,6 +11,7 @@ use App\Models\pagoordene;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class FinalizarCompraController extends Controller
@@ -93,7 +94,7 @@ class FinalizarCompraController extends Controller
                 }
             );
         } catch (\Exception $e) {
-            // Si falla el correo, no se rompe la compra.
+            Log::error('Error al enviar correo de compra: ' . $e->getMessage());
         }
 
         return response()->json([

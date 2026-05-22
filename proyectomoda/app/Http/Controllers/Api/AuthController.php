@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Http\Controllers\Controller;
@@ -53,7 +54,7 @@ class AuthController extends Controller
                 }
             );
         } catch (\Exception $e) {
-            // Si falla el correo, no se rompe el registro.
+            Log::error('Error al enviar correo de registro: ' . $e->getMessage());
         }
 
         try {

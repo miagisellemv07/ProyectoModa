@@ -1,34 +1,34 @@
 import { useEffect, useState } from "react";
+import { apiFetch, getImageUrl } from "../api";
 
 function Home() {
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
-    fetch("/api/productos")
-      .then((res) => res.json())
-      .then((data) => {
-        setProductos((data.data || []).slice(0, 3));
-      });
+    obtenerProductos();
   }, []);
 
+  async function obtenerProductos() {
+    try {
+      const respuesta = await apiFetch("/productos");
+      const data = await respuesta.json();
+
+      setProductos((data.data || []).slice(0, 3));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const irAProductos = () => {
-    window.location.href = "/productos";
+    window.location.href = "/#/productos";
   };
 
   const irALogin = () => {
-    window.location.href = "/login";
+    window.location.href = "/#/login";
   };
 
   function obtenerImagen(producto) {
-    if (!producto.imagen) {
-      return "https://via.placeholder.com/400";
-    }
-
-    if (producto.imagen.startsWith("http")) {
-      return producto.imagen;
-    }
-
-    return `/storage/${producto.imagen}`;
+    return getImageUrl(producto?.imagen, "https://via.placeholder.com/400");
   }
 
   return (

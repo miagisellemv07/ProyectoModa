@@ -29,7 +29,7 @@ class ProductoController extends Controller
             'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'tienda_id' => 'required|exists:tiendas,id',
-            'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+            'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp,jfif|max:4096'
         ]);
 
         $datos = [
@@ -86,7 +86,7 @@ class ProductoController extends Controller
             'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'tienda_id' => 'required|exists:tiendas,id',
-            'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+            'imagen' => 'nullable|image|mimes:jpg,jpeg,png,webp,jfif|max:4096'
         ]);
 
         $producto->nombre = $request->nombre;
