@@ -1,39 +1,64 @@
 import { useEffect, useState } from "react";
+import { apiFetch, getImageUrl } from "../../api";
 
 function ClienteCompras() {
   const [compras, setCompras] = useState([]);
+  const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
     obtener();
   }, []);
 
+  function cerrarSesionExpirada() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/#/login";
+  }
+
   async function obtener() {
-    const token = localStorage.getItem("token");
+    try {
+      const respuesta = await apiFetch("/cliente/compras");
+      const data = await respuesta.json();
 
-    const r = await fetch("/api/cliente/compras", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      if (!respuesta.ok) {
+        if (respuesta.status === 401) {
+          cerrarSesionExpirada();
+          return;
+        }
 
-    const data = await r.json();
-    setCompras(data.data || []);
+        setMensaje(data.message || data.error || "No se pudieron cargar tus compras.");
+        return;
+      }
+
+      setCompras(data.data || []);
+    } catch (error) {
+      console.log(error);
+      setMensaje("Error al conectar con el servidor.");
+    }
   }
 
   function imagenProducto(producto) {
-    if (!producto?.imagen) return "https://via.placeholder.com/90";
-
-    const imagen = producto.imagen.replace(/^\/+/, "");
-
-    if (imagen.startsWith("http")) return imagen;
-    if (imagen.startsWith("storage/")) return `/${imagen}`;
-
-    return `/storage/${imagen}`;
+    return getImageUrl(producto?.imagen, "https://via.placeholder.com/90");
   }
 
   return (
     <div>
       <h1 style={{ marginBottom: "25px" }}>Mis compras</h1>
+
+      {mensaje && (
+        <div
+          style={{
+            background: "white",
+            padding: "15px",
+            borderRadius: "15px",
+            marginBottom: "20px",
+            color: "#684b7c",
+            fontWeight: "bold",
+          }}
+        >
+          {mensaje}
+        </div>
+      )}
 
       {compras.length === 0 && <p>Sin compras</p>}
 
@@ -93,7 +118,9 @@ function ClienteCompras() {
               <div>
                 <h4>{item.producto?.nombre || "Producto"}</h4>
                 <p>Cantidad: {item.cantidad}</p>
-                <p>Precio unitario: ${Number(item.precio_unitario).toFixed(2)} MXN</p>
+                <p>
+                  Precio unitario: ${Number(item.precio_unitario).toFixed(2)} MXN
+                </p>
               </div>
 
               <h4 style={{ color: "#684b7c" }}>

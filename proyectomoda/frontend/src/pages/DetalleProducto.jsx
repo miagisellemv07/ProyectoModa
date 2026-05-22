@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { apiFetch, getImageUrl } from "../api";
 
 function DetalleProducto() {
   const { id } = useParams();
@@ -19,7 +20,7 @@ function DetalleProducto() {
 
   async function obtenerProducto() {
     try {
-      const respuesta = await fetch(`/api/productos/${id}`);
+      const respuesta = await apiFetch(`/productos/${id}`);
       const data = await respuesta.json();
       setProducto(data.data);
     } catch (error) {
@@ -31,7 +32,7 @@ function DetalleProducto() {
 
   async function obtenerResenas() {
     try {
-      const respuesta = await fetch(`/api/productos/${id}/resenas`);
+      const respuesta = await apiFetch(`/productos/${id}/resenas`);
       const data = await respuesta.json();
       setResenas(data);
     } catch (error) {
@@ -40,11 +41,7 @@ function DetalleProducto() {
   }
 
   function obtenerImagen(producto) {
-    if (producto.imagen) {
-      return `/storage/${producto.imagen}`;
-    }
-
-    return "https://via.placeholder.com/600x500";
+    return getImageUrl(producto?.imagen, "https://via.placeholder.com/600x500");
   }
 
   function promedioResenas() {
@@ -76,11 +73,17 @@ function DetalleProducto() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      window.location.href = "/login";
+      window.location.href = "/#/login";
       return null;
     }
 
     return token;
+  }
+
+  function cerrarSesionExpirada() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/#/login";
   }
 
   function cambiarCantidad(valor) {
@@ -105,12 +108,8 @@ function DetalleProducto() {
     if (!token) return;
 
     try {
-      const respuesta = await fetch("/api/resenas", {
+      const respuesta = await apiFetch("/resenas", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           producto_id: Number(id),
           calificacion: Number(calificacion),
@@ -121,6 +120,11 @@ function DetalleProducto() {
       const data = await respuesta.json();
 
       if (!respuesta.ok) {
+        if (respuesta.status === 401 || data.error === "Unauthorized") {
+          cerrarSesionExpirada();
+          return;
+        }
+
         setMensaje(data.message || data.error || "No se pudo publicar la reseña.");
         return;
       }
@@ -141,12 +145,8 @@ function DetalleProducto() {
     if (!token) return;
 
     try {
-      const respuesta = await fetch("/api/carritos", {
+      const respuesta = await apiFetch("/carritos", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           producto_id: Number(id),
           cantidad: Number(cantidad),
@@ -157,9 +157,7 @@ function DetalleProducto() {
 
       if (!respuesta.ok) {
         if (respuesta.status === 401 || data.error === "Unauthorized") {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          window.location.href = "/login";
+          cerrarSesionExpirada();
           return;
         }
 
@@ -167,10 +165,12 @@ function DetalleProducto() {
         return;
       }
 
-      window.location.href = "/carrito";
+      window.location.href = "/#/carrito";
     } catch (error) {
       console.log(error);
-      setMensaje("Error al conectar con el carrito. Si tu sesión expiró, inicia sesión otra vez.");
+      setMensaje(
+        "Error al conectar con el carrito. Si tu sesión expiró, inicia sesión otra vez."
+      );
     }
   }
 
@@ -183,7 +183,7 @@ function DetalleProducto() {
   }
 
   function regresar() {
-    window.location.href = "/productos";
+    window.location.href = "/#/productos";
   }
 
   if (cargando) {

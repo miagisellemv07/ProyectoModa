@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
+import { apiFetch, getImageUrl } from "../../api";
 
-const API_PRODUCTOS = "/api/productos";
-const API_TIENDAS = "/api/tiendas";
-const STORAGE_URL = "/storage/";
+const API_PRODUCTOS = "/productos";
+const API_TIENDAS = "/tiendas";
 
 function EmprendedorProductos() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -32,7 +32,7 @@ function EmprendedorProductos() {
     setCargando(true);
 
     try {
-      const respuesta = await fetch(API_PRODUCTOS);
+      const respuesta = await apiFetch(API_PRODUCTOS);
       const data = await respuesta.json();
 
       const propios = (data.data || []).filter(
@@ -43,6 +43,7 @@ function EmprendedorProductos() {
       setProductos(propios);
     } catch (error) {
       console.log(error);
+      alert("Error al cargar los productos.");
     }
 
     setCargando(false);
@@ -50,34 +51,22 @@ function EmprendedorProductos() {
 
   async function obtenerTiendas() {
     try {
-      const respuesta = await fetch(API_TIENDAS);
+      const respuesta = await apiFetch(API_TIENDAS);
       const data = await respuesta.json();
 
       const propias = (data.data || []).filter(
-        (tienda) =>
-          tienda.emprendedor?.usuario?.email === user?.email
+        (tienda) => tienda.emprendedor?.usuario?.email === user?.email
       );
 
       setTiendas(propias);
     } catch (error) {
       console.log(error);
+      alert("Error al cargar las tiendas.");
     }
   }
 
   function obtenerImagen(producto) {
-    if (!producto.imagen) {
-      return "https://via.placeholder.com/400x300";
-    }
-
-    if (producto.imagen.startsWith("http")) {
-      return producto.imagen;
-    }
-
-    if (producto.imagen.startsWith("storage/")) {
-      return `/${producto.imagen}`;
-    }
-
-    return `${STORAGE_URL}${producto.imagen}`;
+    return getImageUrl(producto.imagen, "https://via.placeholder.com/400x300");
   }
 
   function abrirNuevo() {
@@ -157,11 +146,8 @@ function EmprendedorProductos() {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch(API_PRODUCTOS, {
+      const respuesta = await apiFetch(API_PRODUCTOS, {
         method: "POST",
-        headers: {
-          Accept: "application/json",
-        },
         body: crearFormData(),
       });
 
@@ -174,7 +160,7 @@ function EmprendedorProductos() {
       obtenerProductos();
     } catch (error) {
       console.log(error);
-      alert("Error al conectar con Laravel.");
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -185,11 +171,8 @@ function EmprendedorProductos() {
       const datos = crearFormData();
       datos.append("_method", "PUT");
 
-      const respuesta = await fetch(`${API_PRODUCTOS}/${seleccionado.id}`, {
+      const respuesta = await apiFetch(`${API_PRODUCTOS}/${seleccionado.id}`, {
         method: "POST",
-        headers: {
-          Accept: "application/json",
-        },
         body: datos,
       });
 
@@ -202,7 +185,7 @@ function EmprendedorProductos() {
       obtenerProductos();
     } catch (error) {
       console.log(error);
-      alert("Error al conectar con Laravel.");
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -214,16 +197,19 @@ function EmprendedorProductos() {
     if (!confirmar) return;
 
     try {
-      await fetch(`${API_PRODUCTOS}/${id}`, {
+      const respuesta = await apiFetch(`${API_PRODUCTOS}/${id}`, {
         method: "DELETE",
-        headers: {
-          Accept: "application/json",
-        },
       });
+
+      if (!respuesta.ok) {
+        alert("No se pudo eliminar el producto.");
+        return;
+      }
 
       obtenerProductos();
     } catch (error) {
       console.log(error);
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -351,12 +337,26 @@ function EmprendedorProductos() {
                   }}
                 />
 
-                <p><strong>ID:</strong> {seleccionado.id}</p>
-                <p><strong>Nombre:</strong> {seleccionado.nombre}</p>
-                <p><strong>Descripción:</strong> {seleccionado.descripcion}</p>
-                <p><strong>Precio:</strong> ${Number(seleccionado.precio).toFixed(2)}</p>
-                <p><strong>Stock:</strong> {seleccionado.stock}</p>
-                <p><strong>Tienda:</strong> {seleccionado.tienda?.nombre || "Sin tienda"}</p>
+                <p>
+                  <strong>ID:</strong> {seleccionado.id}
+                </p>
+                <p>
+                  <strong>Nombre:</strong> {seleccionado.nombre}
+                </p>
+                <p>
+                  <strong>Descripción:</strong> {seleccionado.descripcion}
+                </p>
+                <p>
+                  <strong>Precio:</strong> $
+                  {Number(seleccionado.precio).toFixed(2)}
+                </p>
+                <p>
+                  <strong>Stock:</strong> {seleccionado.stock}
+                </p>
+                <p>
+                  <strong>Tienda:</strong>{" "}
+                  {seleccionado.tienda?.nombre || "Sin tienda"}
+                </p>
 
                 <button className="btn btn-secondary" onClick={cerrarModal}>
                   Volver

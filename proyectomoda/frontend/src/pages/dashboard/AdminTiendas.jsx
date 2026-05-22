@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../api";
 
-const API_TIENDAS = "/api/tiendas";
-const API_EMPRENDEDORES = "/api/emprendedores";
+const API_TIENDAS = "/tiendas";
+const API_EMPRENDEDORES = "/emprendedores";
 
 function AdminTiendas() {
   const [tiendas, setTiendas] = useState([]);
@@ -28,7 +29,7 @@ function AdminTiendas() {
     setCargando(true);
 
     try {
-      const respuesta = await fetch(API_TIENDAS);
+      const respuesta = await apiFetch(API_TIENDAS);
       const data = await respuesta.json();
 
       const sinDuplicados = [];
@@ -49,6 +50,7 @@ function AdminTiendas() {
       setTiendas(sinDuplicados);
     } catch (error) {
       console.log(error);
+      alert("Error al cargar las tiendas.");
     }
 
     setCargando(false);
@@ -56,11 +58,10 @@ function AdminTiendas() {
 
   async function obtenerEmprendedores() {
     try {
-      const respuesta = await fetch(API_EMPRENDEDORES);
+      const respuesta = await apiFetch(API_EMPRENDEDORES);
       const data = await respuesta.json();
 
       const lista = data.emprendedores || [];
-
       const sinDuplicados = [];
 
       lista.forEach((emp) => {
@@ -79,6 +80,7 @@ function AdminTiendas() {
       setEmprendedores(sinDuplicados);
     } catch (error) {
       console.log(error);
+      alert("Error al cargar los emprendedores.");
     }
   }
 
@@ -143,12 +145,8 @@ function AdminTiendas() {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch(API_TIENDAS, {
+      const respuesta = await apiFetch(API_TIENDAS, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
         body: JSON.stringify(form),
       });
 
@@ -161,7 +159,7 @@ function AdminTiendas() {
       obtenerTiendas();
     } catch (error) {
       console.log(error);
-      alert("Error al conectar con Laravel.");
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -169,12 +167,8 @@ function AdminTiendas() {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch(`${API_TIENDAS}/${seleccionada.id}`, {
+      const respuesta = await apiFetch(`${API_TIENDAS}/${seleccionada.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
         body: JSON.stringify(form),
       });
 
@@ -187,7 +181,7 @@ function AdminTiendas() {
       obtenerTiendas();
     } catch (error) {
       console.log(error);
-      alert("Error al conectar con Laravel.");
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -197,16 +191,19 @@ function AdminTiendas() {
     if (!confirmar) return;
 
     try {
-      await fetch(`${API_TIENDAS}/${id}`, {
+      const respuesta = await apiFetch(`${API_TIENDAS}/${id}`, {
         method: "DELETE",
-        headers: {
-          Accept: "application/json",
-        },
       });
+
+      if (!respuesta.ok) {
+        alert("No se pudo eliminar la tienda.");
+        return;
+      }
 
       obtenerTiendas();
     } catch (error) {
       console.log(error);
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -215,7 +212,7 @@ function AdminTiendas() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="fw-bold m-0">Tiendas</h2>
-          <p className="text-muted m-0">CRUD de tiendas según tu tabla actual</p>
+          <p className="text-muted m-0">Administración de tiendas</p>
         </div>
 
         <button className="btn btn-accent" onClick={abrirNuevo}>
@@ -302,14 +299,26 @@ function AdminTiendas() {
               <>
                 <div className="mb-4">
                   <h2 className="fw-bold m-0">Detalle de la tienda</h2>
-                  <p className="text-muted m-0">Información completa del registro</p>
+                  <p className="text-muted m-0">
+                    Información completa del registro
+                  </p>
                 </div>
 
-                <p><strong>ID:</strong> {seleccionada.id}</p>
-                <p><strong>Nombre:</strong> {seleccionada.nombre}</p>
-                <p><strong>Categoría:</strong> {seleccionada.categoria}</p>
-                <p><strong>Logo:</strong> {seleccionada.logo}</p>
-                <p><strong>Descripción:</strong> {seleccionada.descripcion}</p>
+                <p>
+                  <strong>ID:</strong> {seleccionada.id}
+                </p>
+                <p>
+                  <strong>Nombre:</strong> {seleccionada.nombre}
+                </p>
+                <p>
+                  <strong>Categoría:</strong> {seleccionada.categoria}
+                </p>
+                <p>
+                  <strong>Logo:</strong> {seleccionada.logo}
+                </p>
+                <p>
+                  <strong>Descripción:</strong> {seleccionada.descripcion}
+                </p>
                 <p>
                   <strong>Emprendedor:</strong>{" "}
                   {seleccionada.emprendedor?.usuario?.nombre}{" "}
@@ -397,8 +406,12 @@ function AdminTiendas() {
                       <option value="">Seleccione un emprendedor</option>
 
                       {emprendedores.map((emp) => (
-                        <option key={obtenerIdEmprendedor(emp)} value={obtenerIdEmprendedor(emp)}>
-                          {obtenerNombreEmprendedor(emp)} - {obtenerMarcaEmprendedor(emp)}
+                        <option
+                          key={obtenerIdEmprendedor(emp)}
+                          value={obtenerIdEmprendedor(emp)}
+                        >
+                          {obtenerNombreEmprendedor(emp)} -{" "}
+                          {obtenerMarcaEmprendedor(emp)}
                         </option>
                       ))}
                     </select>

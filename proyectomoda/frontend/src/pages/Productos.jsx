@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch, getImageUrl } from "../api";
 
 function Productos() {
   const [productos, setProductos] = useState([]);
@@ -12,48 +13,41 @@ function Productos() {
 
   async function obtenerProductos() {
     try {
-      const respuesta = await fetch("/api/productos");
+      const respuesta = await apiFetch("/productos");
       const data = await respuesta.json();
 
-      setProductos(data.data);
+      setProductos(data.data || []);
     } catch (error) {
       console.log(error);
+      setMensaje("Error al cargar los productos.");
     }
 
     setCargando(false);
   }
 
   function obtenerImagen(producto) {
-    if (!producto.imagen) {
-      return "https://via.placeholder.com/400x300";
-    }
-
-    const imagen = producto.imagen.replace(/^\/+/, "");
-
-    if (imagen.startsWith("http")) {
-      return imagen;
-    }
-
-    if (imagen.startsWith("storage/")) {
-      return `/${imagen}`;
-    }
-
-    return `/storage/${imagen}`;
+    return getImageUrl(producto?.imagen, "https://via.placeholder.com/400x300");
   }
 
   function verDetalle(producto) {
-    window.location.href = `/productos/${producto.id}`;
+    window.location.href = `/#/productos/${producto.id}`;
   }
 
   function requiereLogin() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      window.location.href = "/login";
+      window.location.href = "/#/login";
       return null;
     }
 
     return token;
+  }
+
+  function cerrarSesionExpirada() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/#/login";
   }
 
   async function agregarAlCarrito(producto) {
@@ -62,12 +56,8 @@ function Productos() {
     if (!token) return;
 
     try {
-      const respuesta = await fetch("/api/carritos", {
+      const respuesta = await apiFetch("/carritos", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           producto_id: Number(producto.id),
           cantidad: 1,
@@ -78,9 +68,7 @@ function Productos() {
 
       if (!respuesta.ok) {
         if (respuesta.status === 401 || data.error === "Unauthorized") {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          window.location.href = "/login";
+          cerrarSesionExpirada();
           return;
         }
 
@@ -88,10 +76,12 @@ function Productos() {
         return;
       }
 
-      window.location.href = "/carrito";
+      window.location.href = "/#/carrito";
     } catch (error) {
       console.log(error);
-      setMensaje("Error al conectar con el carrito. Inicia sesión otra vez si tu sesión expiró.");
+      setMensaje(
+        "Error al conectar con el carrito. Inicia sesión otra vez si tu sesión expiró."
+      );
     }
   }
 
@@ -210,8 +200,7 @@ function Productos() {
                   marginTop: "15px",
                 }}
               >
-                <b>Vendedor:</b>{" "}
-                {producto.tienda?.nombre || "Sin tienda"}
+                <b>Vendedor:</b> {producto.tienda?.nombre || "Sin tienda"}
 
                 <br />
 

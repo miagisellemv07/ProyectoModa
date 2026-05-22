@@ -20,12 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) {
-    if ($request->is('api/*')) {
-        return response()->json([
-            'error' => 'Validación fallida',
-            'message' => 'Los datos enviados no son correctos para los estándares de BitCorp.',
-            'details' => $e->errors(),
-        ], 422);
-    }
-});
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'error' => 'Validación fallida',
+                    'message' => 'Los datos enviados no son correctos para Virtuality Mall.',
+                    'details' => $e->errors(),
+                ], 422);
+            }
+        });
     })->create();

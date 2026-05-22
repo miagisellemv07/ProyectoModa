@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../api";
 
-const API_USUARIOS = "/api/users";
+const API_USUARIOS = "/users";
 
 function AdminUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -27,12 +28,13 @@ function AdminUsuarios() {
     setCargando(true);
 
     try {
-      const respuesta = await fetch(API_USUARIOS);
+      const respuesta = await apiFetch(API_USUARIOS);
       const data = await respuesta.json();
 
       setUsuarios(data.data || []);
     } catch (error) {
       console.log(error);
+      alert("Error al cargar los usuarios.");
     }
 
     setCargando(false);
@@ -91,12 +93,8 @@ function AdminUsuarios() {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch(API_USUARIOS, {
+      const respuesta = await apiFetch(API_USUARIOS, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
         body: JSON.stringify(form),
       });
 
@@ -109,7 +107,7 @@ function AdminUsuarios() {
       obtenerUsuarios();
     } catch (error) {
       console.log(error);
-      alert("Error al conectar con Laravel.");
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -124,12 +122,8 @@ function AdminUsuarios() {
         delete datos.password_confirmation;
       }
 
-      const respuesta = await fetch(`${API_USUARIOS}/${seleccionado.id}`, {
+      const respuesta = await apiFetch(`${API_USUARIOS}/${seleccionado.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
         body: JSON.stringify(datos),
       });
 
@@ -142,7 +136,7 @@ function AdminUsuarios() {
       obtenerUsuarios();
     } catch (error) {
       console.log(error);
-      alert("Error al conectar con Laravel.");
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -154,16 +148,19 @@ function AdminUsuarios() {
     if (!confirmar) return;
 
     try {
-      await fetch(`${API_USUARIOS}/${id}`, {
+      const respuesta = await apiFetch(`${API_USUARIOS}/${id}`, {
         method: "DELETE",
-        headers: {
-          Accept: "application/json",
-        },
       });
+
+      if (!respuesta.ok) {
+        alert("No se pudo eliminar el usuario.");
+        return;
+      }
 
       obtenerUsuarios();
     } catch (error) {
       console.log(error);
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -172,7 +169,7 @@ function AdminUsuarios() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="fw-bold m-0">Usuarios</h2>
-          <p className="text-muted m-0">CRUD de usuarios del sistema</p>
+          <p className="text-muted m-0">Administración de usuarios del sistema</p>
         </div>
 
         <button className="btn btn-accent" onClick={abrirNuevo}>
@@ -271,12 +268,24 @@ function AdminUsuarios() {
                   </p>
                 </div>
 
-                <p><strong>ID:</strong> {seleccionado.id}</p>
-                <p><strong>Nombre:</strong> {seleccionado.nombre}</p>
-                <p><strong>Apellido:</strong> {seleccionado.apellido}</p>
-                <p><strong>Email:</strong> {seleccionado.email}</p>
-                <p><strong>Teléfono:</strong> {seleccionado.tel}</p>
-                <p><strong>Rol:</strong> {seleccionado.rol}</p>
+                <p>
+                  <strong>ID:</strong> {seleccionado.id}
+                </p>
+                <p>
+                  <strong>Nombre:</strong> {seleccionado.nombre}
+                </p>
+                <p>
+                  <strong>Apellido:</strong> {seleccionado.apellido}
+                </p>
+                <p>
+                  <strong>Email:</strong> {seleccionado.email}
+                </p>
+                <p>
+                  <strong>Teléfono:</strong> {seleccionado.tel}
+                </p>
+                <p>
+                  <strong>Rol:</strong> {seleccionado.rol}
+                </p>
 
                 <button className="btn btn-secondary" onClick={cerrarModal}>
                   Volver

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { apiFetch, getImageUrl } from "../api";
 
 function Carrito() {
   const [items, setItems] = useState([]);
@@ -19,24 +20,15 @@ function Carrito() {
     }
   }, [mostrarCheckout, items]);
 
-  function token() {
-    return localStorage.getItem("token");
-  }
-
   function cerrarSesionExpirada() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/login";
+    window.location.href = "/#/login";
   }
 
   async function obtenerCarrito() {
     try {
-      const respuesta = await fetch("/api/carritos", {
-        headers: {
-          Authorization: `Bearer ${token()}`,
-        },
-      });
-
+      const respuesta = await apiFetch("/carritos");
       const data = await respuesta.json();
 
       if (!respuesta.ok) {
@@ -58,15 +50,7 @@ function Carrito() {
 
   async function obtenerConfigPaypal() {
     try {
-      const respuesta = await fetch(
-        `/api/paypal/${total().toFixed(2)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token()}`,
-          },
-        }
-      );
-
+      const respuesta = await apiFetch(`/paypal/${total().toFixed(2)}`);
       const data = await respuesta.json();
 
       if (!respuesta.ok) {
@@ -112,19 +96,12 @@ function Carrito() {
     );
 
     try {
-      const respuesta = await fetch(
-        `/api/carritos/${item.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token()}`,
-          },
-          body: JSON.stringify({
-            cantidad: nuevaCantidad,
-          }),
-        }
-      );
+      const respuesta = await apiFetch(`/carritos/${item.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          cantidad: nuevaCantidad,
+        }),
+      });
 
       if (!respuesta.ok) obtenerCarrito();
     } catch (error) {
@@ -135,11 +112,8 @@ function Carrito() {
 
   async function eliminarItem(id) {
     try {
-      const respuesta = await fetch(`/api/carritos/${id}`, {
+      const respuesta = await apiFetch(`/carritos/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token()}`,
-        },
       });
 
       if (!respuesta.ok) {
@@ -172,21 +146,7 @@ function Carrito() {
   }
 
   function obtenerImagenProducto(producto) {
-    if (!producto?.imagen) {
-      return "https://via.placeholder.com/400x300";
-    }
-
-    const imagen = producto.imagen.replace(/^\/+/, "");
-
-    if (imagen.startsWith("http")) {
-      return imagen;
-    }
-
-    if (imagen.startsWith("storage/")) {
-      return `/${imagen}`;
-    }
-
-    return `/storage/${imagen}`;
+    return getImageUrl(producto?.imagen, "https://via.placeholder.com/400x300");
   }
 
   function obtenerImagen(item) {
@@ -478,26 +438,19 @@ function Carrito() {
                         label: "paypal",
                       }}
                       createOrder={async () => {
-                        const respuesta = await fetch(
-                          "/api/paypal/create-order",
-                          {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                              Authorization: `Bearer ${token()}`,
-                            },
-                            body: JSON.stringify({
-                              amount: total().toFixed(2),
-                            }),
-                          }
-                        );
+                        const respuesta = await apiFetch("/paypal/create-order", {
+                          method: "POST",
+                          body: JSON.stringify({
+                            amount: total().toFixed(2),
+                          }),
+                        });
 
                         const data = await respuesta.json();
 
                         if (!respuesta.ok || !data.id) {
                           if (respuesta.status === 401) {
                             cerrarSesionExpirada();
-                            return;
+                            throw new Error("Sesión expirada.");
                           }
 
                           setMensaje("No se pudo crear la orden de PayPal.");
@@ -507,19 +460,12 @@ function Carrito() {
                         return data.id;
                       }}
                       onApprove={async (data) => {
-                        const respuesta = await fetch(
-                          "/api/paypal/capture-order",
-                          {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                              Authorization: `Bearer ${token()}`,
-                            },
-                            body: JSON.stringify({
-                              orderID: data.orderID,
-                            }),
-                          }
-                        );
+                        const respuesta = await apiFetch("/paypal/capture-order", {
+                          method: "POST",
+                          body: JSON.stringify({
+                            orderID: data.orderID,
+                          }),
+                        });
 
                         const resultado = await respuesta.json();
 
@@ -534,21 +480,14 @@ function Carrito() {
                         }
 
                         if (resultado.status === "COMPLETED") {
-                          const guardarCompra = await fetch(
-                            "/api/finalizar-compra",
-                            {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `Bearer ${token()}`,
-                              },
-                              body: JSON.stringify({
-                                paypal_order_id: data.orderID,
-                                paypal_status: resultado.status,
-                                total: total().toFixed(2),
-                              }),
-                            }
-                          );
+                          const guardarCompra = await apiFetch("/finalizar-compra", {
+                            method: "POST",
+                            body: JSON.stringify({
+                              paypal_order_id: data.orderID,
+                              paypal_status: resultado.status,
+                              total: total().toFixed(2),
+                            }),
+                          });
 
                           const compra = await guardarCompra.json();
 

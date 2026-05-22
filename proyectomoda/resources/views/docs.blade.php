@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>BitCorp API | Documentación Oficial</title>
+    <title>Virtuality Mall API | Documentación Oficial</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -207,7 +207,7 @@
         <div class="sidebar-header">
             <a href="#" class="brand-logo">
                 <i class="bi bi-cpu-fill"></i>
-                <span>BitCorp API</span>
+                <span>Virtuality Mall API</span>
             </a>
         </div>
         <div class="nav-links">
@@ -268,7 +268,7 @@
                     <div class="col-lg-8">
                         <h1 class="display-6 fw-bold mb-4">Documentación de la API</h1>
                         <p class="lead text-muted">
-                            Bienvenido a la documentación técnica de <strong>BitCorp</strong>. Nuestra API está diseñada bajo los estándares RESTful, utilizando JWT para la autenticación y JSON para el intercambio de datos.
+                            Bienvenido a la documentación técnica de <strong>Virtuality Mall</strong>. Nuestra API está diseñada bajo los estándares RESTful, utilizando JWT para la autenticación y JSON para el intercambio de datos.
                         </p>
                         <div class="alert alert-info border-0 shadow-sm glass">
                             <i class="bi bi-info-circle-fill me-2"></i>
@@ -1874,7 +1874,7 @@
                 <h2 class="section-title"><i class="bi bi-exclamation-triangle-fill text-secondary"></i>Formatos de Error</h2>
                 <div class="api-card">
                     <div class="api-header">
-                        <span class="fw-bold">Estándar BitCorp</span>
+                        <span class="fw-bold">Estándar Virtuality Mall</span>
                     </div>
                     <div class="api-body">
                         <p>En caso de error en la validación, la API retornará un código <strong>422 Unprocessable Entity</strong> con el siguiente formato:</p>
@@ -1884,7 +1884,7 @@
                                 <div class="code-block-header">JSON Response</div>
                                 <pre><code class="language-json">{
     "error": "Validación fallida",
-    "message": "Los datos enviados no son correctos para los estándares de BitCorp.",
+    "message": "Los datos enviados no son correctos para los estándares de Virtuality Mall.",
     "details": {
         "email": [
             "El correo electrónico ya ha sido registrado."
@@ -1901,7 +1901,7 @@
             </section>
 
             <footer class="mt-5 py-4 border-top text-center text-muted small">
-                &copy; <script>document.write(new Date().getFullYear())</script> BitCorp API System. Todos los derechos reservados.
+                &copy; <script>document.write(new Date().getFullYear())</script> Virtuality Mall API System. Todos los derechos reservados.
             </footer>
 
         </div>

@@ -1,28 +1,60 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../api";
 
 function ClientePagos() {
   const [pagos, setPagos] = useState([]);
+  const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
     obtener();
   }, []);
 
+  function cerrarSesionExpirada() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/#/login";
+  }
+
   async function obtener() {
-    const token = localStorage.getItem("token");
+    try {
+      const respuesta = await apiFetch("/cliente/pagos");
+      const data = await respuesta.json();
 
-    const r = await fetch("/api/cliente/pagos", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      if (!respuesta.ok) {
+        if (respuesta.status === 401) {
+          cerrarSesionExpirada();
+          return;
+        }
 
-    const data = await r.json();
-    setPagos(data.data || []);
+        setMensaje(data.message || data.error || "No se pudieron cargar tus pagos.");
+        return;
+      }
+
+      setPagos(data.data || []);
+    } catch (error) {
+      console.log(error);
+      setMensaje("Error al conectar con el servidor.");
+    }
   }
 
   return (
     <div>
       <h1 style={{ marginBottom: "25px" }}>Mis pagos</h1>
+
+      {mensaje && (
+        <div
+          style={{
+            background: "white",
+            padding: "15px",
+            borderRadius: "15px",
+            marginBottom: "20px",
+            color: "#684b7c",
+            fontWeight: "bold",
+          }}
+        >
+          {mensaje}
+        </div>
+      )}
 
       {pagos.length === 0 && <p>Sin pagos</p>}
 

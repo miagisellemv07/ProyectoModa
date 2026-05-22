@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../api";
 
-const API_URL = "/api/emprendedores";
+const API_URL = "/emprendedores";
 
 function AdminClientes() {
   const [emprendedores, setEmprendedores] = useState([]);
@@ -27,7 +28,7 @@ function AdminClientes() {
     setCargando(true);
 
     try {
-      const respuesta = await fetch(API_URL);
+      const respuesta = await apiFetch(API_URL);
       const data = await respuesta.json();
 
       const sinDuplicados = [];
@@ -108,12 +109,8 @@ function AdminClientes() {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch(API_URL, {
+      const respuesta = await apiFetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
         body: JSON.stringify(form),
       });
 
@@ -126,7 +123,7 @@ function AdminClientes() {
       obtenerEmprendedores();
     } catch (error) {
       console.log(error);
-      alert("Error al conectar con Laravel.");
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -143,12 +140,8 @@ function AdminClientes() {
         delete datos.password_confirmation;
       }
 
-      const respuesta = await fetch(`${API_URL}/${id}`, {
+      const respuesta = await apiFetch(`${API_URL}/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
         body: JSON.stringify(datos),
       });
 
@@ -161,7 +154,7 @@ function AdminClientes() {
       obtenerEmprendedores();
     } catch (error) {
       console.log(error);
-      alert("Error al conectar con Laravel.");
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -175,16 +168,19 @@ function AdminClientes() {
     if (!confirmar) return;
 
     try {
-      await fetch(`${API_URL}/${id}`, {
+      const respuesta = await apiFetch(`${API_URL}/${id}`, {
         method: "DELETE",
-        headers: {
-          Accept: "application/json",
-        },
       });
+
+      if (!respuesta.ok) {
+        alert("No se pudo eliminar el emprendedor.");
+        return;
+      }
 
       obtenerEmprendedores();
     } catch (error) {
       console.log(error);
+      alert("Error al conectar con el servidor.");
     }
   }
 
@@ -344,9 +340,7 @@ function AdminClientes() {
                 </div>
 
                 <form
-                  onSubmit={
-                    modal === "nuevo" ? guardarNuevo : guardarEdicion
-                  }
+                  onSubmit={modal === "nuevo" ? guardarNuevo : guardarEdicion}
                 >
                   <Campo
                     label="Nombre"
