@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { apiFetch } from "../api";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -11,12 +12,8 @@ function Login() {
     setError("");
 
     try {
-      const respuesta = await fetch("/api/login", {
+      const respuesta = await apiFetch("/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
         body: JSON.stringify({
           email: email,
           password: password,
@@ -34,23 +31,22 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       if (data.user.rol === "admin") {
-        window.location.href = "/dashboard/admin";
+        window.location.href = "/#/dashboard/admin";
         return;
       }
 
       if (data.user.rol === "cliente") {
-        window.location.href = "/dashboard/cliente";
+        window.location.href = "/#/dashboard/cliente";
         return;
       }
 
       if (data.user.rol === "emprendedor") {
-        window.location.href = "/dashboard/emprendedor";
+        window.location.href = "/#/dashboard/emprendedor";
         return;
       }
 
-      window.location.href = "/";
-    }
-    catch (error) {
+      window.location.href = "/#/";
+    } catch (error) {
       console.log(error);
       setError("No se pudo conectar con Laravel");
     }
@@ -60,7 +56,6 @@ function Login() {
     <div className="container">
       <div className="login-wrapper">
         <div className="login-card">
-
           <div className="login-header">
             <div className="icon-circle">
               <i className="fas fa-user-lock"></i>
@@ -75,7 +70,6 @@ function Login() {
 
           <div className="login-body">
             <form onSubmit={iniciarSesion}>
-
               {error && (
                 <div className="alert alert-danger">
                   {error}
@@ -141,10 +135,8 @@ function Login() {
                   Crear cuenta
                 </Link>
               </div>
-
             </form>
           </div>
-
         </div>
       </div>
     </div>

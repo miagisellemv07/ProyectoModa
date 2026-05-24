@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { apiFetch } from "../api";
 
 function Register() {
   const [form, setForm] = useState({
@@ -26,12 +27,8 @@ function Register() {
     setError("");
 
     try {
-      const respuesta = await fetch("/api/register", {
+      const respuesta = await apiFetch("/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
         body: JSON.stringify(form),
       });
 
@@ -45,7 +42,8 @@ function Register() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      window.location.href = "/dashboard/cliente";
+      window.location.href = "/#/dashboard/cliente";
+
     } catch (error) {
       console.log(error);
       setError("No se pudo conectar con Laravel");
@@ -56,6 +54,7 @@ function Register() {
     <div className="container">
       <div className="register-wrapper">
         <div className="register-card">
+
           <div className="register-header">
             <div className="icon-circle">
               <i className="fas fa-user-plus"></i>
@@ -63,11 +62,15 @@ function Register() {
 
             <h2>Crear cuenta</h2>
 
-            <p>Regístrate en Virtuality Emprendedores Mall</p>
+            <p>
+              Regístrate en Virtuality Emprendedores Mall
+            </p>
           </div>
 
           <div className="register-body">
+
             <form onSubmit={registrar}>
+
               {error && (
                 <div className="alert alert-danger">
                   {error}
@@ -75,8 +78,11 @@ function Register() {
               )}
 
               <div className="row">
+
                 <div className="col-md-6 mb-3">
-                  <label className="form-label">Nombre</label>
+                  <label className="form-label">
+                    Nombre
+                  </label>
 
                   <input
                     name="nombre"
@@ -89,7 +95,9 @@ function Register() {
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label className="form-label">Apellido</label>
+                  <label className="form-label">
+                    Apellido
+                  </label>
 
                   <input
                     name="apellido"
@@ -100,10 +108,14 @@ function Register() {
                     required
                   />
                 </div>
+
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Correo</label>
+
+                <label className="form-label">
+                  Correo
+                </label>
 
                 <input
                   type="email"
@@ -114,10 +126,14 @@ function Register() {
                   onChange={cambiarCampo}
                   required
                 />
+
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Teléfono</label>
+
+                <label className="form-label">
+                  Teléfono
+                </label>
 
                 <input
                   name="tel"
@@ -125,10 +141,14 @@ function Register() {
                   value={form.tel}
                   onChange={cambiarCampo}
                 />
+
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Dirección</label>
+
+                <label className="form-label">
+                  Dirección
+                </label>
 
                 <input
                   name="direccion"
@@ -136,11 +156,16 @@ function Register() {
                   value={form.direccion}
                   onChange={cambiarCampo}
                 />
+
               </div>
 
               <div className="row">
+
                 <div className="col-md-6">
-                  <label className="form-label">Contraseña</label>
+
+                  <label className="form-label">
+                    Contraseña
+                  </label>
 
                   <input
                     type="password"
@@ -150,9 +175,11 @@ function Register() {
                     onChange={cambiarCampo}
                     required
                   />
+
                 </div>
 
                 <div className="col-md-6">
+
                   <label className="form-label">
                     Confirmar contraseña
                   </label>
@@ -165,7 +192,9 @@ function Register() {
                     onChange={cambiarCampo}
                     required
                   />
+
                 </div>
+
               </div>
 
               <button className="btn btn-register mt-4">
@@ -173,12 +202,20 @@ function Register() {
               </button>
 
               <div className="text-center mt-4">
-                <Link to="/login" className="register-link">
+
+                <Link
+                  to="/login"
+                  className="register-link"
+                >
                   ¿Ya tienes cuenta?
                 </Link>
+
               </div>
+
             </form>
+
           </div>
+
         </div>
       </div>
     </div>

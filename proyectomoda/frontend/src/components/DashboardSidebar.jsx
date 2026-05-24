@@ -7,7 +7,9 @@ function DashboardSidebar() {
   function cerrarSesion() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/login";
+
+    // HashRouter
+    window.location.href = "/#/login";
   }
 
   return (
@@ -80,9 +82,10 @@ function DashboardSidebar() {
 
       <hr className="mx-4 opacity-25" />
 
-      <Link to="/" className="nav-link">
+      {/* HashRouter */}
+      <a href="/#/" className="nav-link">
         <i className="fas fa-external-link-alt"></i> Ver sitio web
-      </Link>
+      </a>
 
       <button
         type="button"
